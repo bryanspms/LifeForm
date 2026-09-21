@@ -661,4 +661,32 @@ The result is an ecosystem where learning can spread through observation, teachi
 
 # License
 
-License information to be added.
+LifeForm is licensed under the MIT License.
+
+You are free to:
+
+- Use the source code
+- Modify the source code
+- Distribute copies
+- Incorporate portions of the project into your own work
+- Use the software for commercial or non-commercial purposes
+
+Provided that:
+
+- Proper attribution is maintained
+- The original copyright notice is preserved
+- A copy of the MIT License is included with distributions
+
+See the LICENSE file for full details.
+
+Copyright (c) 2026 Bryan Price
+
+---
+
+## Attribution
+
+If you build upon LifeForm, attribution is appreciated.
+
+Suggested attribution:
+
+"Based on LifeForm (github.com/bryanspms/LifeForm) by Bryan Price"
