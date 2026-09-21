@@ -1,100 +1,664 @@
-# LifeForm: 2D Emergent Reinforcement Learning Simulation
+# LifeForm
 
-**LifeForm** is an interactive, real-time artificial life simulation built with Unity and C#. Autonomous agents operate inside a closed arena populated by food, poison, and rival organisms. Powered by Q-learning policy networks and experiential memory buffers, agents independently discover behavioral archetypes—evolving from basic foragers into apex hunters or cautious survivalists through direct environmental feedback and peer observation.
+An artificial life simulation built with Unity that explores reinforcement learning, social learning, predation, survival, and human-guided behavioral training.
 
----
+## Overview
 
-## Key Features
+LifeForm is a multi-agent ecosystem where autonomous organisms learn to survive by:
 
-- **Emergent Deep Q-Learning (DQN):** Agents train dynamically via real-time experience replay buffers, balancing exploration ($\epsilon$-greedy policies) with exploitation.
-- **Dynamic Behavioral Archetypes:** Agents adapt based on survival pressure, developing distinct instincts for foraging, poison avoidance, evasion, and predatory combat.
-- **Social Learning & Observation:** Organisms observe peer behaviors (`ObservePeer`), allowing learned survival patterns to spread across the population.
-- **Field of View (FOV) Sensory Cones:** Visual sensory arcs project directional fields of view using dynamic vertex generation, scaling cleanly across agent transforms.
-- **Manual Possession & Direct Control:** Seamlessly switch between passive observation and active intervention. Take control of any living organism using Gamepad or Keyboard/Mouse.
-- **In-Game Observability & Analytics:**
-  - Real-time running stats ticker tracking elapsed time, population counts, and resource consumption.
-  - End-of-round leaderboards sorting agents by longevity and metabolic metrics.
-  - Interactive Agent Brain Inspector to view policy drives, replay memory sizes, and learned food/poison weights.
-- **Cross-Platform & Steam Deck Ready:** Engineered for Linux standalone targets (`x86_64`) with native Vulkan rendering and built-in SteamOS controller integration.
+- Finding food
+- Avoiding poison
+- Escaping stronger organisms
+- Hunting weaker organisms
+- Learning from direct experience
+- Learning from observing peers
+- Learning from human-controlled demonstrations
 
----
+Unlike traditional reinforcement-learning demonstrations, LifeForm combines:
 
-## Simulation Mechanics
+- Reinforcement Learning
+- Experience Replay
+- Social Learning
+- Human Demonstration Learning
+- Emergent Predator/Prey Behavior
 
-| Element            | Description                                                                                                                                                    |
-|:------------------ |:-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Agents**         | Autonomous entities driven by neural policies. Energy decays over time; eating food replenishes health, while consuming poison drains it.                      |
-| **Predation**      | Desperate or predatory agents can attack peers within range, siphoning health from weaker organisms. Dead agents drop out of the physics loop as inert matter. |
-| **Sensory System** | Forward-facing directional arcs detect proximity to food, hazards, and other organisms, passing normalized sensor inputs directly to policy evaluators.        |
-| **Food & Poison**  | Dynamically spawned resources with configurable counts and optional arena respawn rules.                                                                       |
+This creates an environment where successful behaviors can spread across the population without being explicitly programmed.
 
 ---
 
-## Controls & Keybindings
+## Quick Start
 
-| Action                       | Keyboard / Mouse                | Steam Deck / Gamepad       |
-|:---------------------------- |:------------------------------- |:-------------------------- |
-| **Select / Inspect Agent**   | Left Mouse Click                | Right Trackpad Click / `A` |
-| **Possess Living Agent**     | Left Click on Agent             | Aim + Left Click / `A`     |
-| **Release Possession**       | Left Click empty space          | Click empty space          |
-| **Cycle Agents**             | `Tab`                           | North Button (`Y`)         |
-| **Manual Movement**          | `W`, `A`, `S`, `D` / Arrow Keys | Left Joystick / D-Pad      |
-| **Stop Simulation / Return** | `Escape`                        | Menu / Start (`☰`)         |
+```bash
+git clone https://github.com/bryanspms/LifeForm.git
+cd LifeForm
+```
+
+1. Open the project in Unity Hub.
+2. Load `Assets/LifeFormScene.unity`.
+3. Press **Play**.
+4. Observe the ecosystem evolve.
 
 ---
 
-## Getting Started
+# System Architecture
 
-### Prerequisites
+```mermaid
+flowchart TD
 
-- **Unity Engine:** Unity 6 (6000.x) or later
-- **Render Pipeline:** Universal Render Pipeline (URP)
-- **UI System:** TextMeshPro (TMP) & Unity Input System Package
+    ENV[Environment]
+    FOOD[Food Resources]
+    POISON[Poison Resources]
+    AGENTS[Other Agents]
 
-### Installation & Editor Setup
+    ENV --> SENSOR
+    FOOD --> SENSOR
+    POISON --> SENSOR
+    AGENTS --> SENSOR
 
-1. Clone the repository:
-   
-   ```bash
-   git clone [https://github.com/your-username/LifeForm.git](https://github.com/your-username/LifeForm.git)
-   ```
+    SENSOR[Sensor System<br/>11-D State Vector]
 
-2. Open the project in Unity Hub.
+    SENSOR --> POLICY
 
-3. Open `Assets/Scenes/SampleScene.unity` (or your primary simulation scene).
+    POLICY[Policy Network<br/>11 → 32 → 4]
 
-4. Press **Play** to start the setup menu, configure arena parameters, and run the simulation.
+    POLICY --> ACTION
 
-### Building for Steam Deck (SteamOS)
+    ACTION[Action Selection<br/>Epsilon-Greedy]
 
-LifeForm targets Linux Standalone natively without requiring Proton translation:
+    ACTION --> MOVE[Movement]
 
-1. In Unity, navigate to **File > Build Settings**.
+    MOVE --> WORLD[World Interaction]
 
-2. Select **PC, Mac & Linux Standalone** and set:
-   
-   - **Target Platform:** `Linux`
-   
-   - **Architecture:** `Intel 64-bit (x86_64)`
+    WORLD --> REWARD[Reward System]
 
-3. Under **Player Settings > Other Settings > Rendering**, ensure **Vulkan** is set as the primary Graphics API.
+    REWARD --> MEMORY
 
-4. Export the build and deploy to the Steam Deck:
-   
-   ```
-   rsync -avz --delete ./Build_Linux/ deck@<steam-deck-ip>:/home/deck/games/simulation/LifeForm/
-   ```
+    MEMORY[Replay Buffer]
 
-5. On the Steam Deck, add `LifeForm.x86_64` as a Non-Steam Game in Desktop Mode, then apply the **Gamepad With Mouse Trackpad** controller template in Gaming Mode.
+    MEMORY --> TRAIN
 
-## Tech Stack & Architecture
+    TRAIN[DQN Training]
 
-- **Engine:** Unity (C#)
+    TRAIN --> POLICY
 
-- **Physics:** 2D Rigidbody & raycast-based spatial queries
+    POLICY --> TARGET[Target Network]
 
-- **Rendering:** Universal Render Pipeline (URP) with Vulkan backends
+    TARGET --> TRAIN
 
-- **Machine Learning:** Custom on-policy/off-policy reinforcement learning with experience replay
+    PLAYER[Human Possession]
 
-- **UI:** TextMeshPro UGUI with event-driven link parsing and responsive canvas anchors
+    PLAYER --> AGENTCTRL
+    AGENTCTRL --> MEMORY
+
+    PEER[Peer Observation]
+
+    PEER --> MEMORY
+
+    AGENTCTRL[Agent Controller]
+
+    AGENTCTRL --> SENSOR
+    AGENTCTRL --> ACTION
+    AGENTCTRL --> WORLD
+```
+
+---
+
+# Learning Architecture
+
+One of the most unique aspects of LifeForm is the combination of reinforcement learning and social learning.
+
+```mermaid
+flowchart LR
+
+    Player[Player Controlled Agent]
+    Peer[Observed Agent]
+    Agent[Learning Agent]
+
+    Player -->|Human Demonstration| Buffer
+
+    Peer -->|Observed Experience| Buffer
+
+    Agent -->|Own Experience| Buffer
+
+    Buffer[Replay Buffer]
+
+    Buffer --> Train[Training]
+
+    Train --> Policy[Policy Network]
+
+    Policy --> Behavior[Behavior]
+
+    Behavior --> Environment
+
+    Environment --> Agent
+```
+
+This allows behavior to spread through a population without being hardcoded.
+
+---
+
+# Agent Decision Cycle
+
+```mermaid
+sequenceDiagram
+
+    participant A as Agent
+    participant S as Sensors
+    participant N as Neural Network
+    participant E as Environment
+    participant M as Replay Buffer
+
+    A->>S: Gather State
+    S->>N: 11-D Input Vector
+    N->>A: Q Values
+
+    A->>A: Select Action
+
+    A->>E: Move
+
+    E->>A: Reward / Penalty
+
+    A->>M: Store Experience
+
+    M->>N: Sample Experience
+
+    N->>N: Update Policy
+```
+
+---
+
+# Core Learning System
+
+Each organism continuously performs the following loop:
+
+```text
+Observe Environment
+        ↓
+Build State Vector
+        ↓
+Neural Network Evaluation
+        ↓
+Choose Action
+        ↓
+Move and Interact
+        ↓
+Receive Reward
+        ↓
+Store Experience
+        ↓
+Train Network
+```
+
+Over time, agents develop increasingly effective survival behaviors.
+
+---
+
+# Neural Network
+
+Each agent contains two neural networks:
+
+- Policy Network
+- Target Network
+
+Architecture:
+
+```text
+Input Layer      11
+      ↓
+Hidden Layer     32 (ReLU)
+      ↓
+Output Layer      4 (Q-values)
+```
+
+Inputs include:
+
+- Agent position
+- Direction to nearest food
+- Direction to nearest poison
+- Direction to strongest nearby threat
+- Direction to weakest nearby prey
+- Current health ratio
+
+Outputs:
+
+```text
+0 = Move Up
+1 = Move Down
+2 = Move Left
+3 = Move Right
+```
+
+Action selection uses epsilon-greedy exploration.
+
+---
+
+# Replay Memory
+
+Agents maintain an experience replay buffer.
+
+Each experience contains:
+
+```text
+State
+Action
+Reward
+Next State
+Done Flag
+Observation Flag
+```
+
+Experiences originate from:
+
+1. Personal experience
+2. Observed peer behavior
+3. Human demonstrations
+
+The replay buffer uses a circular overwrite strategy to maintain a fixed memory footprint.
+
+---
+
+# Social Learning
+
+LifeForm supports observational learning.
+
+When a nearby organism successfully performs an action, neighboring agents can record:
+
+```text
+Observed State
+Observed Action
+Discounted Reward
+Observed Result
+```
+
+This allows useful strategies to spread throughout the ecosystem.
+
+---
+
+# Human Demonstration Learning
+
+Players can directly possess an organism and control its movement.
+
+While possessed:
+
+- AI control is suspended
+- Player behavior is recorded
+- Nearby organisms observe player actions
+- Demonstrated strategies become learning examples
+
+Players effectively act as teachers within the ecosystem.
+
+---
+
+# Survival Mechanics
+
+## Energy
+
+Energy is the primary survival resource.
+
+Agents continuously lose energy over time.
+
+```text
+Movement Cost
++
+Existence Cost
+=
+Energy Drain
+```
+
+If energy reaches zero:
+
+```text
+Agent Dies
+```
+
+---
+
+## Food
+
+Benefits:
+
+```text
++30 Energy
++10 Reward
+```
+
+Food respawns after being consumed.
+
+---
+
+## Poison
+
+Risks:
+
+```text
+-40 Energy
+-15 Reward
+```
+
+Agents may occasionally resist poison effects.
+
+Successful resistance is tracked independently.
+
+---
+
+# Predation System
+
+Agents compare their energy levels against nearby organisms.
+
+When a stronger organism encounters a weaker one:
+
+```text
+Energy Siphon
+```
+
+occurs.
+
+Benefits include:
+
+- Energy gain
+- Positive reinforcement reward
+- Increased survival probability
+
+Consequences for victims include:
+
+- Energy loss
+- Negative reinforcement
+- Potential death
+
+This naturally creates predator/prey relationships.
+
+---
+
+# Behavioral Profiling
+
+When an agent dies, its behavior can be classified based on lifetime performance.
+
+Possible archetypes include:
+
+```text
+Forager
+Apex Hunter
+Survivalist
+Explorer
+Erratic Wanderer
+```
+
+These profiles are derived from:
+
+- Food consumption
+- Poison avoidance
+- Combat activity
+- Exploration tendencies
+- Learned neural-network preferences
+
+---
+
+# Emergent Behaviors
+
+LifeForm is designed to encourage the emergence of:
+
+- Efficient foraging
+- Poison avoidance
+- Predator/prey strategies
+- Risk assessment
+- Social learning
+- Human-influenced adaptation
+- Resource competition
+- Opportunistic hunting
+
+No specific survival strategy is explicitly programmed.
+
+---
+
+# Installation
+
+## Prerequisites
+
+### Unity
+
+Install:
+
+- Unity Hub
+- Compatible Unity Editor version
+
+The required Unity version can be found in:
+
+```text
+ProjectSettings/ProjectVersion.txt
+```
+
+Download Unity Hub:
+
+https://unity.com/download
+
+---
+
+## Clone Repository
+
+```bash
+git clone https://github.com/bryanspms/LifeForm.git
+cd LifeForm
+```
+
+Alternatively download the repository ZIP directly from GitHub.
+
+---
+
+## Open Project
+
+1. Launch Unity Hub.
+2. Click **Add Project**.
+3. Select the cloned `LifeForm` folder.
+4. Allow Unity to import assets and rebuild cache files.
+
+The first launch may take several minutes.
+
+---
+
+## Generated Folders
+
+The repository intentionally excludes:
+
+```text
+Library/
+Temp/
+Logs/
+Obj/
+Build/
+Builds/
+```
+
+These are automatically regenerated by Unity.
+
+---
+
+## Running the Simulation
+
+Open:
+
+```text
+Assets/LifeFormScene.unity
+```
+
+Press:
+
+```text
+Play
+```
+
+Expected behavior:
+
+- Agents spawn
+- Resources populate
+- Learning begins
+- Evolutionary interactions emerge
+
+---
+
+## Controls
+
+### Keyboard
+
+```text
+W A S D
+```
+
+or
+
+```text
+Arrow Keys
+```
+
+### Gamepad
+
+```text
+Left Stick
+D-Pad
+```
+
+### Possessed Agent
+
+When an organism is possessed:
+
+- Manual control overrides AI
+- Training data is generated from player actions
+- Other organisms can learn from demonstrations
+
+---
+
+## Building
+
+Open:
+
+```text
+File → Build Profiles
+```
+
+Select:
+
+```text
+Windows
+```
+
+or
+
+```text
+Linux
+```
+
+Then click:
+
+```text
+Build
+```
+
+---
+
+## Troubleshooting
+
+### Long Initial Load Times
+
+On first load Unity must:
+
+- Import assets
+- Compile scripts
+- Rebuild cache files
+
+This can take several minutes.
+
+### Missing Packages
+
+Open:
+
+```text
+Window → Package Manager
+```
+
+and allow Unity to restore any missing dependencies.
+
+### Build Errors
+
+Try:
+
+```text
+Assets → Reimport All
+```
+
+If issues persist:
+
+```bash
+rm -rf Library
+```
+
+and reopen the project.
+
+Unity will regenerate the folder automatically.
+
+---
+
+# Project Structure
+
+```text
+Assets/
+├── AgentController.cs
+├── NeuralNetwork.cs
+├── ReplayBuffer.cs
+├── FloatingText.cs
+├── NumberStepper.cs
+├── AgentPrefab.prefab
+├── FoodPrefab.prefab
+├── PoisonPrefab.prefab
+├── LifeFormScene.unity
+└── Resources/
+
+Packages/
+ProjectSettings/
+```
+
+---
+
+# Future Development
+
+Potential future areas of exploration include:
+
+- Genetic evolution
+- Reproduction
+- Multi-generational inheritance
+- Improved sensory systems
+- Resource specialization
+- Group behavior
+- Flocking and schooling
+- Pack hunting
+- Advanced reinforcement learning algorithms
+- Persistent ecosystems
+- Long-term analytics and reporting
+
+---
+
+# Why LifeForm Is Different
+
+Most AI simulations focus solely on reinforcement learning.
+
+LifeForm combines:
+
+```text
+Reinforcement Learning
+        +
+Experience Replay
+        +
+Peer Observation
+        +
+Human Demonstration
+        +
+Predator / Prey Dynamics
+        =
+Emergent Intelligence
+```
+
+The result is an ecosystem where learning can spread through observation, teaching, and adaptation rather than hardcoded behavior.
+
+---
+
+# License
+
+License information to be added.
