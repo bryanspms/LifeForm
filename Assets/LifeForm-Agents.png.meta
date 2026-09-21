@@ -1,0 +1,2773 @@
+fileFormatVersion: 2
+guid: 1a6a9563a8637a872a7cf15bd3e637fb
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5481116313261197847
+    second: LifeForm-Agents_0
+  - first:
+      213: 4932074900159803254
+    second: LifeForm-Agents_1
+  - first:
+      213: -3088931240220707534
+    second: LifeForm-Agents_2
+  - first:
+      213: -7692884038760774573
+    second: LifeForm-Agents_3
+  - first:
+      213: -1461741205577918420
+    second: LifeForm-Agents_4
+  - first:
+      213: 8200775184405771477
+    second: LifeForm-Agents_5
+  - first:
+      213: 2787635892403308834
+    second: LifeForm-Agents_6
+  - first:
+      213: 8604259300044090456
+    second: LifeForm-Agents_7
+  - first:
+      213: 7906892309581890958
+    second: LifeForm-Agents_8
+  - first:
+      213: 8940914925872162689
+    second: LifeForm-Agents_9
+  - first:
+      213: -405308011524749896
+    second: LifeForm-Agents_10
+  - first:
+      213: -7355348749904682603
+    second: LifeForm-Agents_11
+  - first:
+      213: -6913434000594011907
+    second: LifeForm-Agents_12
+  - first:
+      213: 1940400542764308548
+    second: LifeForm-Agents_13
+  - first:
+      213: 4546833929563671349
+    second: LifeForm-Agents_14
+  - first:
+      213: 4214712945509528922
+    second: LifeForm-Agents_15
+  - first:
+      213: -2573379818211088320
+    second: LifeForm-Agents_16
+  - first:
+      213: -4415158570385152786
+    second: LifeForm-Agents_17
+  - first:
+      213: 8927381591547129847
+    second: LifeForm-Agents_18
+  - first:
+      213: -8657588024839743796
+    second: LifeForm-Agents_19
+  - first:
+      213: 2996589412577381013
+    second: LifeForm-Agents_20
+  - first:
+      213: 2999982961960039393
+    second: LifeForm-Agents_21
+  - first:
+      213: -2569239565589651674
+    second: LifeForm-Agents_22
+  - first:
+      213: 5623528831638236807
+    second: LifeForm-Agents_23
+  - first:
+      213: -17766766464567937
+    second: LifeForm-Agents_24
+  - first:
+      213: 219433575280937863
+    second: LifeForm-Agents_25
+  - first:
+      213: 5560011724668039593
+    second: LifeForm-Agents_26
+  - first:
+      213: -6345746193107284921
+    second: LifeForm-Agents_27
+  - first:
+      213: -5031193531848915804
+    second: LifeForm-Agents_28
+  - first:
+      213: 3012254723369693469
+    second: LifeForm-Agents_29
+  - first:
+      213: 9021311925548789149
+    second: LifeForm-Agents_30
+  - first:
+      213: -5609774632459889534
+    second: LifeForm-Agents_31
+  - first:
+      213: -2672555390361786911
+    second: LifeForm-Agents_32
+  - first:
+      213: 2050224121479120111
+    second: LifeForm-Agents_33
+  - first:
+      213: -7807410615444016289
+    second: LifeForm-Agents_34
+  - first:
+      213: -8768219955731003179
+    second: LifeForm-Agents_35
+  - first:
+      213: -4545642710399491399
+    second: LifeForm-Agents_36
+  - first:
+      213: 3072871978918875987
+    second: LifeForm-Agents_37
+  - first:
+      213: 8762517208026798238
+    second: LifeForm-Agents_38
+  - first:
+      213: -3606299358410723085
+    second: LifeForm-Agents_39
+  - first:
+      213: 5990872871763461346
+    second: LifeForm-Agents_40
+  - first:
+      213: 4181644828060237521
+    second: LifeForm-Agents_41
+  - first:
+      213: -4279243597371600230
+    second: LifeForm-Agents_42
+  - first:
+      213: -6924421670140099039
+    second: LifeForm-Agents_43
+  - first:
+      213: -1469435787797836629
+    second: LifeForm-Agents_44
+  - first:
+      213: -3628257852292522489
+    second: LifeForm-Agents_45
+  - first:
+      213: 1366038177572567822
+    second: LifeForm-Agents_46
+  - first:
+      213: 9194134667344233848
+    second: LifeForm-Agents_47
+  - first:
+      213: 6449939390136755897
+    second: LifeForm-Agents_48
+  - first:
+      213: 5303857988813694145
+    second: LifeForm-Agents_49
+  - first:
+      213: -2224347231026138327
+    second: LifeForm-Agents_50
+  - first:
+      213: -3914528171809268447
+    second: LifeForm-Agents_51
+  - first:
+      213: 1609728758397017354
+    second: LifeForm-Agents_52
+  - first:
+      213: -1315515565975988053
+    second: LifeForm-Agents_53
+  - first:
+      213: -2368139715609401946
+    second: LifeForm-Agents_54
+  - first:
+      213: -1768350200546196987
+    second: LifeForm-Agents_55
+  - first:
+      213: -7172598991198796240
+    second: LifeForm-Agents_56
+  - first:
+      213: 8018091708509372384
+    second: LifeForm-Agents_57
+  - first:
+      213: 8271603016840385286
+    second: LifeForm-Agents_58
+  - first:
+      213: 3520484999239912851
+    second: LifeForm-Agents_59
+  - first:
+      213: -2669558502265220048
+    second: LifeForm-Agents_60
+  - first:
+      213: -328536978573232483
+    second: LifeForm-Agents_61
+  - first:
+      213: 1673757515330630240
+    second: LifeForm-Agents_62
+  - first:
+      213: 3777055103703568796
+    second: LifeForm-Agents_63
+  - first:
+      213: -2726463254378773854
+    second: LifeForm-Agents_64
+  - first:
+      213: -9081947679343238628
+    second: LifeForm-Agents_65
+  - first:
+      213: -969933292111469790
+    second: LifeForm-Agents_66
+  - first:
+      213: -741645350837995786
+    second: LifeForm-Agents_67
+  - first:
+      213: 5907084070572589970
+    second: LifeForm-Agents_68
+  - first:
+      213: -6977829167883605168
+    second: LifeForm-Agents_69
+  - first:
+      213: -5097105089002849273
+    second: LifeForm-Agents_70
+  - first:
+      213: 2264736462644367740
+    second: LifeForm-Agents_71
+  - first:
+      213: 3878176970916352465
+    second: LifeForm-Agents_72
+  - first:
+      213: -3173070241839962843
+    second: LifeForm-Agents_73
+  - first:
+      213: -6623154098209058579
+    second: LifeForm-Agents_74
+  - first:
+      213: 2002137579980663793
+    second: LifeForm-Agents_75
+  - first:
+      213: -3792890026914623546
+    second: LifeForm-Agents_76
+  - first:
+      213: -43851668301985525
+    second: LifeForm-Agents_77
+  - first:
+      213: -5855982131756154286
+    second: LifeForm-Agents_78
+  - first:
+      213: -4265075053238010315
+    second: LifeForm-Agents_79
+  - first:
+      213: -5874320055461278312
+    second: LifeForm-Agents_80
+  - first:
+      213: -4127282727611279292
+    second: LifeForm-Agents_81
+  - first:
+      213: -7725790580334442772
+    second: LifeForm-Agents_82
+  - first:
+      213: -5378544294401674664
+    second: LifeForm-Agents_83
+  - first:
+      213: 5778071074036555166
+    second: LifeForm-Agents_84
+  - first:
+      213: -831629847572573733
+    second: LifeForm-Agents_85
+  - first:
+      213: 3392350100702543591
+    second: LifeForm-Agents_86
+  - first:
+      213: -5692329919985734763
+    second: LifeForm-Agents_87
+  - first:
+      213: -4877062190564190466
+    second: LifeForm-Agents_88
+  - first:
+      213: 3281060414796857854
+    second: LifeForm-Agents_89
+  - first:
+      213: -4673835697527728305
+    second: LifeForm-Agents_90
+  - first:
+      213: -3458340976298607693
+    second: LifeForm-Agents_91
+  - first:
+      213: -2968081029085403420
+    second: LifeForm-Agents_92
+  - first:
+      213: -3283129381597465338
+    second: LifeForm-Agents_93
+  - first:
+      213: 381933888418933407
+    second: LifeForm-Agents_94
+  - first:
+      213: 4346197331717235480
+    second: LifeForm-Agents_95
+  - first:
+      213: -4076834778986526584
+    second: LifeForm-Agents_96
+  - first:
+      213: 2489898429795061749
+    second: LifeForm-Agents_97
+  - first:
+      213: -5565514088834422600
+    second: LifeForm-Agents_98
+  - first:
+      213: 8691413753687365224
+    second: LifeForm-Agents_99
+  - first:
+      213: -264617817039156821
+    second: LifeForm-Agents_100
+  - first:
+      213: -1746267939905581980
+    second: LifeForm-Agents_101
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: LifeForm-Agents_0
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 1043
+        width: 194
+        height: 188
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71a48882f36d01c40800000000000000
+      internalID: 5481116313261197847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_1
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 1041
+        width: 200
+        height: 194
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67f25ad8dff327440800000000000000
+      internalID: 4932074900159803254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_2
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 1035
+        width: 178
+        height: 204
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 235b9032769e125d0800000000000000
+      internalID: -3088931240220707534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_3
+      rect:
+        serializedVersion: 2
+        x: 622
+        y: 1056
+        width: 224
+        height: 181
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3544463b9b26d3590800000000000000
+      internalID: -7692884038760774573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_4
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 1021
+        width: 232
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c281aff3e1ad6bbe0800000000000000
+      internalID: -1461741205577918420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_5
+      rect:
+        serializedVersion: 2
+        x: 949
+        y: 1230
+        width: 4
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d43855a4910fc170800000000000000
+      internalID: 8200775184405771477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_6
+      rect:
+        serializedVersion: 2
+        x: 953
+        y: 1214
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22904d9131cafa620800000000000000
+      internalID: 2787635892403308834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_7
+      rect:
+        serializedVersion: 2
+        x: 1058
+        y: 1051
+        width: 182
+        height: 170
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85caa7efe38786770800000000000000
+      internalID: 8604259300044090456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_8
+      rect:
+        serializedVersion: 2
+        x: 423
+        y: 1077
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8585edb9aceabd60800000000000000
+      internalID: 7906892309581890958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_9
+      rect:
+        serializedVersion: 2
+        x: 618
+        y: 1080
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 187299b01c2841c70800000000000000
+      internalID: 8940914925872162689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_10
+      rect:
+        serializedVersion: 2
+        x: 1038
+        y: 1077
+        width: 5
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b5827cc28e006af0800000000000000
+      internalID: -405308011524749896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_11
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 1069
+        width: 13
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59161d2484d8ce990800000000000000
+      internalID: -7355348749904682603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_12
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 1061
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df87c78c76c8e00a0800000000000000
+      internalID: -6913434000594011907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_13
+      rect:
+        serializedVersion: 2
+        x: 455
+        y: 1057
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44811715300bdea10800000000000000
+      internalID: 1940400542764308548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_14
+      rect:
+        serializedVersion: 2
+        x: 834
+        y: 1067
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53b06586e59991f30800000000000000
+      internalID: 4546833929563671349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_15
+      rect:
+        serializedVersion: 2
+        x: 988
+        y: 1062
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a55f55be71bad7a30800000000000000
+      internalID: 4214712945509528922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_16
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 1037
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0486e5f80b4894cd0800000000000000
+      internalID: -2573379818211088320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_17
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 867
+        width: 225
+        height: 163
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee4eb293ca43ab2c0800000000000000
+      internalID: -4415158570385152786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_18
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 882
+        width: 188
+        height: 148
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ff278a124e64eb70800000000000000
+      internalID: 8927381591547129847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_19
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 892
+        width: 204
+        height: 142
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc650cfaf811ad780800000000000000
+      internalID: -8657588024839743796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_20
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 874
+        width: 171
+        height: 157
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59a0f52b136069920800000000000000
+      internalID: 2996589412577381013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_21
+      rect:
+        serializedVersion: 2
+        x: 837
+        y: 876
+        width: 194
+        height: 160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e33adbfb9412a920800000000000000
+      internalID: 2999982961960039393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_22
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 1025
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62f562e3a3a385cd0800000000000000
+      internalID: -2569239565589651674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_23
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 876
+        width: 182
+        height: 154
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78ee6f97da9ca0e40800000000000000
+      internalID: 5623528831638236807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_24
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 973
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7572145831e0cff0800000000000000
+      internalID: -17766766464567937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_25
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 910
+        width: 6
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78b0a629ca59b0300800000000000000
+      internalID: 219433575280937863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_26
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 898
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a178d39431292d40800000000000000
+      internalID: 5560011724668039593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_27
+      rect:
+        serializedVersion: 2
+        x: 698
+        y: 900
+        width: 7
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74c8d0565716fe7a0800000000000000
+      internalID: -6345746193107284921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_28
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 900
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a407e1a32c9d2ab0800000000000000
+      internalID: -5031193531848915804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_29
+      rect:
+        serializedVersion: 2
+        x: 1086
+        y: 908
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d11717716bdadc920800000000000000
+      internalID: 3012254723369693469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_30
+      rect:
+        serializedVersion: 2
+        x: 1142
+        y: 910
+        width: 6
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9da45a3663223d70800000000000000
+      internalID: 9021311925548789149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_31
+      rect:
+        serializedVersion: 2
+        x: 996
+        y: 890
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2841b3291b31622b0800000000000000
+      internalID: -5609774632459889534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_32
+      rect:
+        serializedVersion: 2
+        x: 1175
+        y: 885
+        width: 15
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e52ee2480d29ead0800000000000000
+      internalID: -2672555390361786911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_33
+      rect:
+        serializedVersion: 2
+        x: 1189
+        y: 884
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe443b6d9fbd37c10800000000000000
+      internalID: 2050224121479120111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_34
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 750
+        width: 221
+        height: 121
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5378d2296186a390800000000000000
+      internalID: -7807410615444016289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_35
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 665
+        width: 230
+        height: 212
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d889220866015680800000000000000
+      internalID: -8768219955731003179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_36
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 870
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b26bcae902aae0c0800000000000000
+      internalID: -4545642710399491399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_37
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 647
+        width: 224
+        height: 228
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35316b7b8c805aa20800000000000000
+      internalID: 3072871978918875987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_38
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 838
+        width: 15
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e985fa299f6ba9970800000000000000
+      internalID: 8762517208026798238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_39
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 767
+        width: 180
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f0b53c27d9d3fdc0800000000000000
+      internalID: -3606299358410723085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_40
+      rect:
+        serializedVersion: 2
+        x: 658
+        y: 750
+        width: 186
+        height: 119
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e44cf7c22bd32350800000000000000
+      internalID: 5990872871763461346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_41
+      rect:
+        serializedVersion: 2
+        x: 1074
+        y: 754
+        width: 167
+        height: 115
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1de3169d0df280a30800000000000000
+      internalID: 4181644828060237521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_42
+      rect:
+        serializedVersion: 2
+        x: 258
+        y: 547
+        width: 144
+        height: 210
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a921d4fde921d94c0800000000000000
+      internalID: -4279243597371600230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_43
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 745
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 126484c9d2387ef90800000000000000
+      internalID: -6924421670140099039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_44
+      rect:
+        serializedVersion: 2
+        x: 658
+        y: 731
+        width: 19
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bac4018bfe38b9be0800000000000000
+      internalID: -1469435787797836629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_45
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 545
+        width: 194
+        height: 196
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70e1598e4b6d5adc0800000000000000
+      internalID: -3628257852292522489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_46
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 331
+        width: 288
+        height: 413
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0bb5d32c7425f210800000000000000
+      internalID: 1366038177572567822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_47
+      rect:
+        serializedVersion: 2
+        x: 644
+        y: 671
+        width: 5
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 875482074c0289f70800000000000000
+      internalID: 9194134667344233848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_48
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 659
+        width: 25
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b6a6ebb3b9c28950800000000000000
+      internalID: 6449939390136755897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_49
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 506
+        width: 190
+        height: 237
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c4ab526db61b9940800000000000000
+      internalID: 5303857988813694145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_50
+      rect:
+        serializedVersion: 2
+        x: 881
+        y: 543
+        width: 134
+        height: 198
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 923309d7af78121e0800000000000000
+      internalID: -2224347231026138327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_51
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 649
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12d9c082e5dcca9c0800000000000000
+      internalID: -3914528171809268447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_52
+      rect:
+        serializedVersion: 2
+        x: 1062
+        y: 338
+        width: 189
+        height: 402
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0d1cfce6c7e65610800000000000000
+      internalID: 1609728758397017354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_53
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 595
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba8118900995ebde0800000000000000
+      internalID: -1315515565975988053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_54
+      rect:
+        serializedVersion: 2
+        x: 1052
+        y: 593
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a56b90c97da22fd0800000000000000
+      internalID: -2368139715609401946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_55
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 555
+        width: 25
+        height: 65
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50204f99cde8577e0800000000000000
+      internalID: -1768350200546196987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_56
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 292
+        width: 229
+        height: 260
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0364545383fc57c90800000000000000
+      internalID: -7172598991198796240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_57
+      rect:
+        serializedVersion: 2
+        x: 252
+        y: 344
+        width: 136
+        height: 201
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0efb43e5debf54f60800000000000000
+      internalID: 8018091708509372384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_58
+      rect:
+        serializedVersion: 2
+        x: 401
+        y: 526
+        width: 15
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60312d57e13aac270800000000000000
+      internalID: 8271603016840385286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_59
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 516
+        width: 5
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39d49c854764bd030800000000000000
+      internalID: 3520484999239912851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_60
+      rect:
+        serializedVersion: 2
+        x: 684
+        y: 329
+        width: 154
+        height: 207
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0349b55afa2d3fad0800000000000000
+      internalID: -2669558502265220048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_61
+      rect:
+        serializedVersion: 2
+        x: 853
+        y: 340
+        width: 208
+        height: 206
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d96ff80db5dc07bf0800000000000000
+      internalID: -328536978573232483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_62
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 467
+        width: 5
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0623c6d97916a3710800000000000000
+      internalID: 1673757515330630240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_63
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 442
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c91d359ea9bca6430800000000000000
+      internalID: 3777055103703568796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_64
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 376
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a209959d18a92ad0800000000000000
+      internalID: -2726463254378773854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_65
+      rect:
+        serializedVersion: 2
+        x: 1046
+        y: 360
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c12201034b076f180800000000000000
+      internalID: -9081947679343238628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_66
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 165
+        width: 226
+        height: 172
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 223eedb4fca1a82f0800000000000000
+      internalID: -969933292111469790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_67
+      rect:
+        serializedVersion: 2
+        x: 441
+        y: 167
+        width: 204
+        height: 172
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f63bf99b7525b5f0800000000000000
+      internalID: -741645350837995786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_68
+      rect:
+        serializedVersion: 2
+        x: 626
+        y: 297
+        width: 29
+        height: 43
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29309d44aad2af150800000000000000
+      internalID: 5907084070572589970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_69
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 149
+        width: 198
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05b20f88755c92f90800000000000000
+      internalID: -6977829167883605168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_70
+      rect:
+        serializedVersion: 2
+        x: 745
+        y: 327
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70c362b5de17349b0800000000000000
+      internalID: -5097105089002849273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_71
+      rect:
+        serializedVersion: 2
+        x: 765
+        y: 329
+        width: 5
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c71dacd40d5fd6f10800000000000000
+      internalID: 2264736462644367740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_72
+      rect:
+        serializedVersion: 2
+        x: 947
+        y: 323
+        width: 20
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1d1d197586d02d530800000000000000
+      internalID: 3878176970916352465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_73
+      rect:
+        serializedVersion: 2
+        x: 1038
+        y: 129
+        width: 202
+        height: 224
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52524cb3d6df6f3d0800000000000000
+      internalID: -3173070241839962843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_74
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 169
+        width: 188
+        height: 159
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de0939b4074d514a0800000000000000
+      internalID: -6623154098209058579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_75
+      rect:
+        serializedVersion: 2
+        x: 230
+        y: 287
+        width: 9
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fb253e658509cb10800000000000000
+      internalID: 2002137579980663793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_76
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 168
+        width: 201
+        height: 157
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cfc1a9bd92fc5bc0800000000000000
+      internalID: -3792890026914623546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_77
+      rect:
+        serializedVersion: 2
+        x: 835
+        y: 279
+        width: 19
+        height: 27
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b094d08d325346ff0800000000000000
+      internalID: -43851668301985525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_78
+      rect:
+        serializedVersion: 2
+        x: 853
+        y: 231
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 252c3a9074f5bbea0800000000000000
+      internalID: -5855982131756154286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_79
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 217
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53e3e5f16d86fc4c0800000000000000
+      internalID: -4265075053238010315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_80
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 199
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89d074578093a7ea0800000000000000
+      internalID: -5874320055461278312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_81
+      rect:
+        serializedVersion: 2
+        x: 650
+        y: 193
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 448df1df932f8b6c0800000000000000
+      internalID: -4127282727611279292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_82
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 181
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce64b12766a78c490800000000000000
+      internalID: -7725790580334442772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_83
+      rect:
+        serializedVersion: 2
+        x: 849
+        y: 185
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 852fb7306729b55b0800000000000000
+      internalID: -5378544294401674664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_84
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 225
+        height: 168
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9d98ee3705df2050800000000000000
+      internalID: 5778071074036555166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_85
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 18
+        width: 208
+        height: 145
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd113de4f057574f0800000000000000
+      internalID: -831629847572573733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_86
+      rect:
+        serializedVersion: 2
+        x: 431
+        y: 120
+        width: 20
+        height: 25
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eeb222717c041f20800000000000000
+      internalID: 3392350100702543591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_87
+      rect:
+        serializedVersion: 2
+        x: 441
+        y: 0
+        width: 194
+        height: 164
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59b2ce6d818c001b0800000000000000
+      internalID: -5692329919985734763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_88
+      rect:
+        serializedVersion: 2
+        x: 646
+        y: 0
+        width: 176
+        height: 158
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef6dee707c1315cb0800000000000000
+      internalID: -4877062190564190466
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_89
+      rect:
+        serializedVersion: 2
+        x: 839
+        y: 26
+        width: 174
+        height: 136
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef1009e301ba88d20800000000000000
+      internalID: 3281060414796857854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_90
+      rect:
+        serializedVersion: 2
+        x: 996
+        y: 123
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f47d1563233332fb0800000000000000
+      internalID: -4673835697527728305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_91
+      rect:
+        serializedVersion: 2
+        x: 1066
+        y: 56
+        width: 94
+        height: 92
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bb3b8384318100d0800000000000000
+      internalID: -3458340976298607693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_92
+      rect:
+        serializedVersion: 2
+        x: 1154
+        y: 118
+        width: 14
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e6e9c497024fc6d0800000000000000
+      internalID: -2968081029085403420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_93
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 102
+        width: 21
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6053c32e83bff62d0800000000000000
+      internalID: -3283129381597465338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_94
+      rect:
+        serializedVersion: 2
+        x: 1175
+        y: 22
+        width: 51
+        height: 82
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9ae4e219d6ec4500800000000000000
+      internalID: 381933888418933407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_95
+      rect:
+        serializedVersion: 2
+        x: 869
+        y: 64
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 813a1c0327bc05c30800000000000000
+      internalID: 4346197331717235480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_96
+      rect:
+        serializedVersion: 2
+        x: 1006
+        y: 22
+        width: 67
+        height: 47
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 888cc865e5c2c67c0800000000000000
+      internalID: -4076834778986526584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_97
+      rect:
+        serializedVersion: 2
+        x: 1092
+        y: 32
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ffccba0e65ed8220800000000000000
+      internalID: 2489898429795061749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_98
+      rect:
+        serializedVersion: 2
+        x: 1213
+        y: 46
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b8a79e6c6253c2b0800000000000000
+      internalID: -5565514088834422600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_99
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 21
+        width: 4
+        height: 5
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 866da7882ca1e9870800000000000000
+      internalID: 8691413753687365224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_100
+      rect:
+        serializedVersion: 2
+        x: 755
+        y: 24
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba944265f73e35cf0800000000000000
+      internalID: -264617817039156821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeForm-Agents_101
+      rect:
+        serializedVersion: 2
+        x: 1134
+        y: 16
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46c464f8f8204c7e0800000000000000
+      internalID: -1746267939905581980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 2966bf4483ab8aa668041faa32a7f8b9
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      LifeForm-Agents_0: 5481116313261197847
+      LifeForm-Agents_1: 4932074900159803254
+      LifeForm-Agents_10: -405308011524749896
+      LifeForm-Agents_100: -264617817039156821
+      LifeForm-Agents_101: -1746267939905581980
+      LifeForm-Agents_11: -7355348749904682603
+      LifeForm-Agents_12: -6913434000594011907
+      LifeForm-Agents_13: 1940400542764308548
+      LifeForm-Agents_14: 4546833929563671349
+      LifeForm-Agents_15: 4214712945509528922
+      LifeForm-Agents_16: -2573379818211088320
+      LifeForm-Agents_17: -4415158570385152786
+      LifeForm-Agents_18: 8927381591547129847
+      LifeForm-Agents_19: -8657588024839743796
+      LifeForm-Agents_2: -3088931240220707534
+      LifeForm-Agents_20: 2996589412577381013
+      LifeForm-Agents_21: 2999982961960039393
+      LifeForm-Agents_22: -2569239565589651674
+      LifeForm-Agents_23: 5623528831638236807
+      LifeForm-Agents_24: -17766766464567937
+      LifeForm-Agents_25: 219433575280937863
+      LifeForm-Agents_26: 5560011724668039593
+      LifeForm-Agents_27: -6345746193107284921
+      LifeForm-Agents_28: -5031193531848915804
+      LifeForm-Agents_29: 3012254723369693469
+      LifeForm-Agents_3: -7692884038760774573
+      LifeForm-Agents_30: 9021311925548789149
+      LifeForm-Agents_31: -5609774632459889534
+      LifeForm-Agents_32: -2672555390361786911
+      LifeForm-Agents_33: 2050224121479120111
+      LifeForm-Agents_34: -7807410615444016289
+      LifeForm-Agents_35: -8768219955731003179
+      LifeForm-Agents_36: -4545642710399491399
+      LifeForm-Agents_37: 3072871978918875987
+      LifeForm-Agents_38: 8762517208026798238
+      LifeForm-Agents_39: -3606299358410723085
+      LifeForm-Agents_4: -1461741205577918420
+      LifeForm-Agents_40: 5990872871763461346
+      LifeForm-Agents_41: 4181644828060237521
+      LifeForm-Agents_42: -4279243597371600230
+      LifeForm-Agents_43: -6924421670140099039
+      LifeForm-Agents_44: -1469435787797836629
+      LifeForm-Agents_45: -3628257852292522489
+      LifeForm-Agents_46: 1366038177572567822
+      LifeForm-Agents_47: 9194134667344233848
+      LifeForm-Agents_48: 6449939390136755897
+      LifeForm-Agents_49: 5303857988813694145
+      LifeForm-Agents_5: 8200775184405771477
+      LifeForm-Agents_50: -2224347231026138327
+      LifeForm-Agents_51: -3914528171809268447
+      LifeForm-Agents_52: 1609728758397017354
+      LifeForm-Agents_53: -1315515565975988053
+      LifeForm-Agents_54: -2368139715609401946
+      LifeForm-Agents_55: -1768350200546196987
+      LifeForm-Agents_56: -7172598991198796240
+      LifeForm-Agents_57: 8018091708509372384
+      LifeForm-Agents_58: 8271603016840385286
+      LifeForm-Agents_59: 3520484999239912851
+      LifeForm-Agents_6: 2787635892403308834
+      LifeForm-Agents_60: -2669558502265220048
+      LifeForm-Agents_61: -328536978573232483
+      LifeForm-Agents_62: 1673757515330630240
+      LifeForm-Agents_63: 3777055103703568796
+      LifeForm-Agents_64: -2726463254378773854
+      LifeForm-Agents_65: -9081947679343238628
+      LifeForm-Agents_66: -969933292111469790
+      LifeForm-Agents_67: -741645350837995786
+      LifeForm-Agents_68: 5907084070572589970
+      LifeForm-Agents_69: -6977829167883605168
+      LifeForm-Agents_7: 8604259300044090456
+      LifeForm-Agents_70: -5097105089002849273
+      LifeForm-Agents_71: 2264736462644367740
+      LifeForm-Agents_72: 3878176970916352465
+      LifeForm-Agents_73: -3173070241839962843
+      LifeForm-Agents_74: -6623154098209058579
+      LifeForm-Agents_75: 2002137579980663793
+      LifeForm-Agents_76: -3792890026914623546
+      LifeForm-Agents_77: -43851668301985525
+      LifeForm-Agents_78: -5855982131756154286
+      LifeForm-Agents_79: -4265075053238010315
+      LifeForm-Agents_8: 7906892309581890958
+      LifeForm-Agents_80: -5874320055461278312
+      LifeForm-Agents_81: -4127282727611279292
+      LifeForm-Agents_82: -7725790580334442772
+      LifeForm-Agents_83: -5378544294401674664
+      LifeForm-Agents_84: 5778071074036555166
+      LifeForm-Agents_85: -831629847572573733
+      LifeForm-Agents_86: 3392350100702543591
+      LifeForm-Agents_87: -5692329919985734763
+      LifeForm-Agents_88: -4877062190564190466
+      LifeForm-Agents_89: 3281060414796857854
+      LifeForm-Agents_9: 8940914925872162689
+      LifeForm-Agents_90: -4673835697527728305
+      LifeForm-Agents_91: -3458340976298607693
+      LifeForm-Agents_92: -2968081029085403420
+      LifeForm-Agents_93: -3283129381597465338
+      LifeForm-Agents_94: 381933888418933407
+      LifeForm-Agents_95: 4346197331717235480
+      LifeForm-Agents_96: -4076834778986526584
+      LifeForm-Agents_97: 2489898429795061749
+      LifeForm-Agents_98: -5565514088834422600
+      LifeForm-Agents_99: 8691413753687365224
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

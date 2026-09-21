@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="Unity.Services.CloudBuild.Editor.Components" elementFormDefault="qualified" targetNamespace="Unity.Services.CloudBuild.Editor.Components" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="UnityEditor.UIElements.xsd" namespace="UnityEditor.UIElements" />
+  <xs:complexType name="BuildAutomationToolbarSelectionMenuType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="UnityEditor.UIElements" base="q1:ToolbarMenuType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BuildAutomationToolbarSelectionMenu" xmlns:q2="UnityEditor.UIElements" substitutionGroup="q2:ToolbarMenu" type="tns:BuildAutomationToolbarSelectionMenuType" />
+</xs:schema>
