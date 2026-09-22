@@ -2,6 +2,8 @@
 
 An artificial life simulation built with Unity that explores reinforcement learning, social learning, predation, survival, and human-guided behavioral training.
 
+![Alt text](LifeForm-Setup.png)
+
 ## Overview
 
 LifeForm is a multi-agent ecosystem where autonomous organisms learn to survive by:
