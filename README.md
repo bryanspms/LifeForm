@@ -412,6 +412,16 @@ No specific survival strategy is explicitly programmed.
 
 ---
 
+### Possessed Agent
+
+When an organism is possessed:
+
+- Manual control overrides AI
+- Training data is generated from player actions
+- Other organisms can learn from demonstrations
+
+---
+
 # Installation
 
 ## Prerequisites
@@ -518,13 +528,7 @@ Left Stick
 D-Pad
 ```
 
-### Possessed Agent
 
-When an organism is possessed:
-
-- Manual control overrides AI
-- Training data is generated from player actions
-- Other organisms can learn from demonstrations
 
 ---
 
