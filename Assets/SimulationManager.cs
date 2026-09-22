@@ -18,9 +18,14 @@ public class SimulationManager : MonoBehaviour
     public TMP_InputField inputAgents;
     public Slider sliderAgents;
     public TMP_InputField inputFood;
+    public Slider sliderFood;
     public TMP_InputField inputPoison;
+    public Slider sliderPoison;
+    public TMP_InputField inputPoisonChance;
+    public Slider sliderPoisonChance;
     public TMP_InputField inputVision;
-    public Slider inputPoisonChance;
+    public Slider sliderVision;
+
     // Normalized runtime chance (0.0f to 1.0f)
     public static float PoisonDamageChance = 0.5f;
 
@@ -31,10 +36,10 @@ public class SimulationManager : MonoBehaviour
     private int lastHoveredLine = -1;
 
     [Header("Simulation Parameters (Defaults)")]
-    public int agentCount = 6;
+    public int agentCount = 10;
     public int foodCount = 40;
     public int poisonCount = 20;
-    public int globalVisionRadius = 5;
+    public int globalVisionRadius = 10;
 
     [HideInInspector] public Vector2 arenaSize;
     
@@ -70,59 +75,146 @@ public class SimulationManager : MonoBehaviour
 
     void Start()
     {
-        if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false);
-        if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(false);
-        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false);
+        if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false); //
+        if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(false); 
+        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false); 
 
-        Camera cam = Camera.main;
-        if (cam != null && cam.orthographic)
+        Camera cam = Camera.main; 
+        if (cam != null && cam.orthographic) 
         {
-            float screenHeight = cam.orthographicSize;
-            float screenWidth = screenHeight * cam.aspect;
-            arenaSize = new Vector2(screenWidth * 0.9f, screenHeight * 0.9f);
+            float screenHeight = cam.orthographicSize; 
+            float screenWidth = screenHeight * cam.aspect; 
+            arenaSize = new Vector2(screenWidth * 0.9f, screenHeight * 0.9f); 
         }
         else
         {
-            arenaSize = new Vector2(16f, 9f);
+            arenaSize = new Vector2(16f, 9f); 
         }
 
-        if (sliderAgents != null)
+        if (inputAgents != null) inputAgents.text = agentCount.ToString(); 
+        if (inputFood != null) inputFood.text = foodCount.ToString(); 
+        if (inputPoison != null) inputPoison.text = poisonCount.ToString(); 
+        if (inputPoisonChance != null) inputPoisonChance.text = Mathf.RoundToInt(PoisonDamageChance * 100f).ToString();
+        if (inputVision != null) inputVision.text = globalVisionRadius.ToString(); 
+
+        if (setupPanel != null) setupPanel.SetActive(true); 
+        if (leaderboardPanel != null) leaderboardPanel.SetActive(false); 
+        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false); 
+
+        //  Setup Agent Count Slider & bind listener in code
+        if (sliderAgents != null) 
         {
-            sliderAgents.wholeNumbers = true;
-            sliderAgents.minValue = 1f;
-            sliderAgents.maxValue = 20f;
+            sliderAgents.wholeNumbers = true; 
+            sliderAgents.minValue = 1f; // Clamped to 1 so you don't spawn 0 agents
+            sliderAgents.maxValue = 20f; 
             sliderAgents.value = agentCount;
-        }
-        if (inputAgents != null) inputAgents.text = agentCount.ToString();
-        if (inputFood != null) inputFood.text = foodCount.ToString();
-        if (inputPoison != null) inputPoison.text = poisonCount.ToString();
-        if (inputVision != null) inputVision.text = globalVisionRadius.ToString();
 
-        if (setupPanel != null) setupPanel.SetActive(true);
-        if (leaderboardPanel != null) leaderboardPanel.SetActive(false);
-        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false);
-
-        if (sliderAgents != null)
-        {
-            sliderAgents.wholeNumbers = true;
-            sliderAgents.minValue = 0f;
-            sliderAgents.maxValue = 20f;
-            sliderAgents.value = float.Parse(inputAgents.text);
-            inputAgents.text = agentCount.ToString();
-        }
-        else
-        {
-            sliderAgents.value = 10;
-            inputAgents.text = "10";
+            // Automatically updates the agent text box whenever the slider moves:
+            sliderAgents.onValueChanged.RemoveAllListeners();
+            sliderAgents.onValueChanged.AddListener(delegate { UpdateNumberOfAgents(); });
         }
 
-
-        if (inputPoisonChance != null)
+        // Setup Food Slider & bind listener in code
+        if (sliderFood != null) 
         {
-            inputPoisonChance.wholeNumbers = true;
-            inputPoisonChance.minValue = 0f;
-            inputPoisonChance.maxValue = 100f;
-            inputPoisonChance.value = 50f; // Default 50%
+            sliderFood.wholeNumbers = true; 
+            sliderFood.minValue = 0f; 
+            sliderFood.maxValue = 100f; 
+            if (inputFood.text != null  && int.TryParse(inputFood.text, out int x)) sliderFood.value = Mathf.Max(0, x);
+
+            // Automatically updates the food chance text box whenever the slider moves:
+            sliderFood.onValueChanged.RemoveAllListeners();
+            sliderFood.onValueChanged.AddListener(delegate { UpdateFood(); });
+
+            Debug.Log("[SimulationManager.cs] - Start() - sliderFood.value = " + sliderFood.value);
+        }
+
+        // Setup Poison Slider & bind listener in code
+        if (sliderPoison != null) 
+        {
+            sliderPoison.wholeNumbers = true; 
+            sliderPoison.minValue = 0f; 
+            sliderPoison.maxValue = 100f; 
+            if (inputPoison.text != null  && int.TryParse(inputPoison.text, out int x)) sliderPoison.value = Mathf.Max(0, x);
+
+            // Automatically updates the poison text box whenever the slider moves:
+            sliderPoison.onValueChanged.RemoveAllListeners();
+            sliderPoison.onValueChanged.AddListener(delegate { UpdatePoison(); });
+
+            Debug.Log("[SimulationManager.cs] - Start() - sliderPoison.value = " + sliderPoison.value);
+        }
+
+        // Setup Poison Chance Slider & bind listener in code
+        if (sliderPoisonChance != null) 
+        {
+            sliderPoisonChance.wholeNumbers = true; 
+            sliderPoisonChance.minValue = 0f; 
+            sliderPoisonChance.maxValue = 100f; 
+            sliderPoisonChance.value = Mathf.RoundToInt(PoisonDamageChance * 100f);
+
+            // Automatically updates the poison chance text box whenever the slider moves:
+            sliderPoisonChance.onValueChanged.RemoveAllListeners();
+            sliderPoisonChance.onValueChanged.AddListener(delegate { UpdatePoisonChance(); });
+        }
+
+        // Setup Vision Slider & bind listener in code
+        if (sliderVision != null) 
+        {
+            sliderVision.wholeNumbers = true; 
+            sliderVision.minValue = 0f; 
+            sliderVision.maxValue = 20f; 
+            sliderVision.value = globalVisionRadius;
+
+            // Automatically updates the food chance text box whenever the slider moves:
+            sliderVision.onValueChanged.RemoveAllListeners();
+            sliderVision.onValueChanged.AddListener(delegate { UpdateVision(); });
+
+            Debug.Log("[SimulationManager.cs] - Start() - sliderVision.value = " + sliderVision.value);
+        }
+    }
+
+    public void UpdateNumberOfAgents()
+    {
+        Debug.Log($"[SimulationManager] In UpdateNumberOfAgents!");
+        if (sliderAgents != null && inputAgents != null)
+        {
+            inputAgents.text = Mathf.RoundToInt(sliderAgents.value).ToString();
+        }
+    }
+
+    public void UpdateFood()
+    {
+        Debug.Log($"[SimulationManager] In UpdateFood!");
+        if (sliderFood != null && inputFood != null)
+        {
+            inputFood.text = Mathf.RoundToInt(sliderFood.value).ToString();
+        }
+    }
+
+    public void UpdatePoison()
+    {
+        Debug.Log($"[SimulationManager] In UpdatePoison!");
+        if (sliderPoison != null && inputPoison != null)
+        {
+            inputPoison.text = Mathf.RoundToInt(sliderPoison.value).ToString();
+        }
+    }
+
+    public void UpdatePoisonChance()
+    {
+        Debug.Log($"[SimulationManager] In UpdatePoisonChance!");
+        if (sliderPoisonChance != null && inputPoisonChance != null)
+        {
+            inputPoisonChance.text = Mathf.RoundToInt(sliderPoisonChance.value).ToString();
+        }
+    }
+
+    public void UpdateVision()
+    {
+        Debug.Log($"[SimulationManager] In UpdateVision!");
+        if (sliderVision != null)
+        {
+            inputVision.text = Mathf.RoundToInt(sliderVision.value).ToString();
         }
     }
 
@@ -147,14 +239,32 @@ public class SimulationManager : MonoBehaviour
             agentCount = Mathf.RoundToInt(sliderAgents.value);
             inputAgents.text = agentCount.ToString();
         }
-        //if (inputAgents != null && int.TryParse(inputAgents.text, out int a)) agentCount = Mathf.Max(1, a);
+        if (sliderFood != null)
+        {
+            inputFood.text = sliderFood.value.ToString();
+        }
+        if (sliderPoison != null)
+        {
+            inputPoison.text = sliderPoison.value.ToString();
+        }
+        if (sliderPoisonChance != null)
+        {
+            inputPoisonChance.text = (Mathf.RoundToInt(sliderPoisonChance.value)).ToString();
+        }
+        if (sliderVision != null)
+        {
+            inputVision.text = sliderVision.value.ToString();
+        }
+
         if (inputFood != null && int.TryParse(inputFood.text, out int f)) foodCount = Mathf.Max(0, f);
         if (inputPoison != null && int.TryParse(inputPoison.text, out int p)) poisonCount = Mathf.Max(0, p);
         if (inputVision != null && int.TryParse(inputVision.text, out int v)) globalVisionRadius = Mathf.Max(0, v);
         if (inputPoisonChance != null)
         {
             // Divide by 100f so 50 becomes 0.50f, 100 becomes 1.0f, etc.
-            PoisonDamageChance = inputPoisonChance.value / 100f;
+            //PoisonDamageChance = inputPoisonChance.value / 100f;
+            float.TryParse(inputPoisonChance.text, out PoisonDamageChance);
+            PoisonDamageChance = (PoisonDamageChance / 100f);
         }
 
         if (setupPanel != null) setupPanel.SetActive(false);
@@ -753,11 +863,5 @@ public class SimulationManager : MonoBehaviour
         #else
             Application.Quit();
         #endif
-    }
-
-    public void UpdateNumberOfAgents()
-    {
-        Debug.Log("<color=orange>[SimulationManager] in UpdateNumberOfAgents(): </color>" + sliderAgents.value.ToString());
-        inputAgents.text = sliderAgents.value.ToString();
     }
 }
