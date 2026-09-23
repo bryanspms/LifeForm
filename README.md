@@ -47,12 +47,12 @@ cd LifeForm
 To recombine and unpack your split archive (due to GitHub's 25GB limit), you only need to run the extraction command on the first part (.001). 7-Zip will automatically locate, merge, and unpack all subsequent parts in the sequence as long as they reside in the same folder.
 
 1.Download the following files:
-    - LifeForm_Parts.7z.001
-    - LifeForm_Parts.7z.002
+    -    LifeForm.x86_64_Parts.7z.001
+    -    LifeForm.x86_64_Parts.7z.002
 2. Open Terminal and navigate to the foler containing the 2 7zip files.
 3. Enter the commands:
 ```bash
-7z x LifeForm_Build.7z.001 -o"/home/deck/games/simulation/LifeForm"
+7z x LifeForm.x86_64_Parts.001 -o"/home/deck/games/simulation/LifeForm"
 cd /home/deck/games/simulation/LifeForm
 chmod +x LifeForm.x86_64
 ./LifeForm.x86_64
