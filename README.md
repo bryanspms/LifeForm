@@ -28,7 +28,7 @@ This creates an environment where successful behaviors can spread across the pop
 
 ---
 
-## Quick Start
+## Quick Start for Unity (download project)
 
 ```bash
 git clone https://github.com/bryanspms/LifeForm.git
@@ -38,6 +38,26 @@ cd LifeForm
 1. Open the project in Unity Hub.
 2. Load `Assets/LifeFormScene.unity`.
 3. Press **Play**.
+4. Observe the ecosystem evolve.
+
+---
+
+## Quick Start for SteamDeck (download files)
+
+To recombine and unpack your split archive (due to GitHub's 25GB limit), you only need to run the extraction command on the first part (.001). 7-Zip will automatically locate, merge, and unpack all subsequent parts in the sequence as long as they reside in the same folder.
+
+1.Download the following files:
+    - LifeForm_Parts.7z.001
+    - LifeForm_Parts.7z.002
+2. Open Terminal and navigate to the foler containing the 2 7zip files.
+3. Enter the commands:
+```bash
+7z x LifeForm_Build.7z.001 -o"/home/deck/games/simulation/LifeForm"
+cd /home/deck/games/simulation/LifeForm
+chmod +x LifeForm.x86_64
+./LifeForm.x86_64
+```
+   **NOTE:**  -o"/home/deck/games/simulation/LifeForm" is the output folder for the ziped file parts.  Modify the path where ever you choose to install it.
 4. Observe the ecosystem evolve.
 
 ---
