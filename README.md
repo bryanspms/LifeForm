@@ -16,15 +16,29 @@ LifeForm is a multi-agent ecosystem where autonomous organisms learn to survive 
 - Learning from observing peers
 - Learning from human-controlled demonstrations
 
-Unlike traditional reinforcement-learning demonstrations, LifeForm combines:
+---
 
-- Reinforcement Learning
-- Experience Replay
-- Social Learning
-- Human Demonstration Learning
-- Emergent Predator/Prey Behavior
+# Why LifeForm Is Different
 
-This creates an environment where successful behaviors can spread across the population without being explicitly programmed.
+Most AI simulations focus solely on reinforcement learning.
+
+LifeForm combines:
+
+```text
+Reinforcement Learning
+        +
+Experience Replay
+        +
+Peer Observation
+        +
+Human Demonstration
+        +
+Predator / Prey Dynamics
+        =
+Emergent Intelligence
+```
+
+The result is an ecosystem where learning can spread through observation, teaching, and adaptation rather than hardcoded behavior.
 
 ---
 
@@ -658,30 +672,6 @@ Potential future areas of exploration include:
 - Advanced reinforcement learning algorithms
 - Persistent ecosystems
 - Long-term analytics and reporting
-
----
-
-# Why LifeForm Is Different
-
-Most AI simulations focus solely on reinforcement learning.
-
-LifeForm combines:
-
-```text
-Reinforcement Learning
-        +
-Experience Replay
-        +
-Peer Observation
-        +
-Human Demonstration
-        +
-Predator / Prey Dynamics
-        =
-Emergent Intelligence
-```
-
-The result is an ecosystem where learning can spread through observation, teaching, and adaptation rather than hardcoded behavior.
 
 ---
 
