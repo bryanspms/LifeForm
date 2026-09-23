@@ -467,15 +467,25 @@ public class SimulationManager : MonoBehaviour
             ? "<color=#00FFFF>Directly Player-Controlled</color>"
             : $"<color=#55FF55>{record.playerObservationsLogged} steps</color> ({record.playerInfluencePercent:F1}% of memory)";
 
-        txtBrainDetails.text = 
-            $"<b><size=120%><color=#FFD700>Agent #{record.agentId} Brain Summary</color></size></b>\n\n" +
-            $"<b>Archetype:</b> <color=#00FFFF>{record.primaryDrive}</color>\n" +
-            $"<b>Replay Memories:</b> {record.experiencesLogged} steps\n" +
-            $"<b>Player Imprint / Imitation:</b> {influenceText}\n" +
-            $"<b>Exploration vs Exploitation:</b> {(1f - record.finalEpsilon) * 100f:F1}% Policy Driven\n\n" +
-            $"<b>Learned Instincts:</b>\n" +
-            $"• Food Seeking Drive: {(record.foodAffinity > 0f ? "<color=#55FF55>High (+)</color>" : "<color=#AAAAAA>Low (0)</color>")}\n" +
-            $"• Poison Avoidance: {(record.poisonAvoidance > 0f ? "<color=#55FF55>Cautious (+)</color>" : "<color=#FF5555>Blind (-)</color>")}";
+            string foodStatus = record.foodAffinity > 0.005f 
+                ? $"<color=#55FF55>High (+{record.foodAffinity:F3})</color>" 
+                : $"<color=#AAAAAA>Low ({record.foodAffinity:F3})</color>";
+
+            string poisonStatus = record.poisonAvoidance > 0.005f 
+                ? $"<color=#55FF55>Cautious (+{record.poisonAvoidance:F3})</color>" 
+                : $"<color=#FF5555>Blind ({record.poisonAvoidance:F3})</color>";
+
+            txtBrainDetails.text = 
+                $"<b><size=120%><color=#FFD700>Agent #{record.agentId} Brain Summary</color></size></b>\n\n" +
+                $"<b>Archetype:</b> <color=#00FFFF>{record.primaryDrive}</color>\n" +
+                $"<b>Replay Memories:</b> {record.experiencesLogged} steps\n" +
+                $"<b>Peer Observations:</b> <color=#FFAA55>{record.peerObservationsLogged} steps</color>\n" +
+                $"<b>Player Imprint / Imitation:</b> {influenceText}\n" +
+                $"<b>Exploration vs Exploitation:</b> {(1f - record.finalEpsilon) * 100f:F1}% Policy Driven\n\n" +
+                $"<b>Learned Instincts:</b>\n" +
+                $"• Food Seeking Drive: {foodStatus}\n" +
+                $"• Poison Avoidance: {poisonStatus}";
+                
             // Force the text mesh to re-render immediately
             txtBrainDetails.ForceMeshUpdate();
         }

@@ -19,6 +19,7 @@ public struct AgentRecord
     // Player / Possession Tracking
     public bool wasEverPossessed;
     public int playerObservationsLogged;   // Total experiences copied from the player
+    public int peerObservationsLogged;     // Total experiences observed
     public float playerInfluencePercent;   // Percentage of buffer influenced by player
     
     // Cognitive / Training summaries
@@ -119,12 +120,19 @@ public class AgentController : MonoBehaviour
 
     private LineRenderer visionRing;
 
-    [Header("Player Tracking")]
+    [Header("Player & Peer Tracking")]
     public bool hasBeenPossessed = false;
     public int playerMemoriesImprinted = 0;
+    public int peerMemoriesImprinted = 0; // Tracks observations of other AI agents
 
     [Header("Visuals & Death")]
     public Sprite deadSprite; // Assign the death slice from your sprite sheet in the Inspector
+
+    // Distance-based reward shaping
+    private float previousFoodDistance = -1f;
+    private float currentFoodDistance = -1f;
+    private float previousPoisonDistance = -1f;
+    private float currentPoisonDistance = -1f;
 
     void Awake()
     {
@@ -335,6 +343,10 @@ public class AgentController : MonoBehaviour
             }
         }
 
+        // Track nearest food and poison distance for reward shaping (-1 if not in sight)
+        currentFoodDistance = (minFDist < float.MaxValue) ? minFDist : -1f;
+        currentPoisonDistance = (minPDist < float.MaxValue) ? minPDist : -1f;
+
         float healthRatio = Mathf.Clamp01(energy / 100f);
 
         return new float[] {
@@ -384,9 +396,15 @@ public class AgentController : MonoBehaviour
             energy -= 0.04f;
             if (energy <= 0f) Die();
 
-            float cx = Mathf.Clamp(transform.position.x, -arenaBounds.x, arenaBounds.x);
-            float cy = Mathf.Clamp(transform.position.y, -arenaBounds.y, arenaBounds.y);
-            transform.position = new Vector3(cx, cy, transform.position.z);
+            // Wrap boundaries for possessed player
+            Vector3 pos = transform.position;
+            if (pos.x > arenaBounds.x) pos.x = -arenaBounds.x;
+            else if (pos.x < -arenaBounds.x) pos.x = arenaBounds.x;
+
+            if (pos.y > arenaBounds.y) pos.y = -arenaBounds.y;
+            else if (pos.y < -arenaBounds.y) pos.y = arenaBounds.y;
+
+            transform.position = pos;
             return;
         }
 
@@ -397,60 +415,12 @@ public class AgentController : MonoBehaviour
         {
             LastState = GetSensorState(arenaBounds);
             LastAction = SelectAction(LastState);
+            LastReward = 0f; // Reset per decision frame so rewards accurately reflect immediate transitions
             decisionCooldown = dynamicInterval;
         }
         else
         {
             decisionCooldown--;
-        }
-
-        // --- WALL BOUNCE / REDIRECTION LOGIC ---
-        // actions: 0 = Up (0, 1), 1 = Down (0, -1), 2 = Left (-1, 0), 3 = Right (1, 0)
-        bool hitWall = false;
-
-        // Check if trying to move past the horizontal boundaries
-        if (transform.position.x >= arenaBounds.x && LastAction == 3) // Moving Right into Right wall
-        {
-            hitWall = true;
-        }
-        else if (transform.position.x <= -arenaBounds.x && LastAction == 2) // Moving Left into Left wall
-        {
-            hitWall = true;
-        }
-        // Check if trying to move past the vertical boundaries
-        else if (transform.position.y >= arenaBounds.y && LastAction == 0) // Moving Up into Top wall
-        {
-            hitWall = true;
-        }
-        else if (transform.position.y <= -arenaBounds.y && LastAction == 1) // Moving Down into Bottom wall
-        {
-            hitWall = true;
-        }
-
-        if (hitWall)
-        {
-            // Pick a random alternative action that does not push into the same wall
-            List<int> openActions = new List<int>();
-
-            if (transform.position.y < arenaBounds.y) openActions.Add(0); // Up is available
-            if (transform.position.y > -arenaBounds.y) openActions.Add(1); // Down is available
-            if (transform.position.x > -arenaBounds.x) openActions.Add(2); // Left is available
-            if (transform.position.x < arenaBounds.x) openActions.Add(3); // Right is available
-
-            if (openActions.Count > 0)
-            {
-                LastAction = openActions[Random.Range(0, openActions.Count)];
-            }
-            else
-            {
-                LastAction = Random.Range(0, 4);
-            }
-
-            // Give the new heading time to clear the wall
-            decisionCooldown = dynamicInterval;
-
-            // Small negative reward so the neural net learns walls are dead ends
-            LastReward -= 0.05f;
         }
 
         float dynamicSpeed = moveSpeed * (1f + desperation * 0.75f);
@@ -466,10 +436,40 @@ public class AgentController : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, 0, angle);
         }
 
-        // Clamp to prevent escaping the camera frame
-        float clampedX = Mathf.Clamp(transform.position.x, -arenaBounds.x, arenaBounds.x);
-        float clampedY = Mathf.Clamp(transform.position.y, -arenaBounds.y, arenaBounds.y);
-        transform.position = new Vector3(clampedX, clampedY, transform.position.z);
+        // Wrap around screen boundaries
+        Vector3 wrapPos = transform.position;
+        if (wrapPos.x > arenaBounds.x) wrapPos.x = -arenaBounds.x;
+        else if (wrapPos.x < -arenaBounds.x) wrapPos.x = arenaBounds.x;
+
+        if (wrapPos.y > arenaBounds.y) wrapPos.y = -arenaBounds.y;
+        else if (wrapPos.y < -arenaBounds.y) wrapPos.y = arenaBounds.y;
+
+        transform.position = wrapPos;
+        rb.position = wrapPos; // removes a visual flicker when an agent crosses screen boundariaes.
+
+        energy -= 0.04f;
+        LastReward -= 0.005f;
+
+        // Give a tiny positive reward if the agent reduces its distance to the nearest visible food item.
+        // This gives the agent a "scent trail" so it doesn't need to bump into food purely by luck before learning begins.
+        // The same is true for poison so it can try to avoid it.
+        // --- REWARD SHAPING: APPROACHING / RETREATING ---
+        // 1. Food Attraction
+        if (currentFoodDistance > 0f && previousFoodDistance > 0f)
+        {
+            float distanceDelta = previousFoodDistance - currentFoodDistance;
+            LastReward += distanceDelta * 0.05f;
+        }
+        previousFoodDistance = currentFoodDistance;
+
+        // 2. Poison Repulsion (penalty for stepping closer, reward for steering away)
+        if (currentPoisonDistance > 0f && previousPoisonDistance > 0f)
+        {
+            float poisonDelta = previousPoisonDistance - currentPoisonDistance;
+            // Negative if moving closer, positive if moving away
+            LastReward -= poisonDelta * 0.08f;
+        }
+        previousPoisonDistance = currentPoisonDistance;
 
         energy -= 0.04f;
         LastReward -= 0.005f;
@@ -494,10 +494,14 @@ public class AgentController : MonoBehaviour
             float discountedReward = peer.LastReward * imitationWeight;
             float[] peerNextState = peer.GetSensorState(arenaBounds);
 
-            // Track when this agent imprints an observation of the player
+            // Track whether this came from the player or a regular peer
             if (peer.isPossessed)
             {
                 playerMemoriesImprinted++;
+            }
+            else
+            {
+                peerMemoriesImprinted++;
             }
 
             memory.Push(peer.LastState, peer.LastAction, discountedReward, peerNextState, !peer.isAlive, true);
@@ -556,21 +560,32 @@ public class AgentController : MonoBehaviour
                 poisonEatenCount++;
                 energy -= 40f;
                 LastReward -= 15f;
-                poisonEatenCount++;
 
                 if (audioSource != null && poisonEatClip != null)
                 {
                     audioSource.PlayOneShot(poisonEatClip, soundVolume);
                 }
 
-                if (energy <= 0f) Die();
-            } else {
+                if (energy <= 0f)
+                {
+                    // Push terminal death transition to memory BEFORE calling Die()
+                    float[] nextState = GetSensorState(Vector2.zero);
+                    memory.Push(LastState, LastAction, LastReward - 20f, nextState, true, false);
+                    Die();
+                }
+            } 
+            else 
+            {
                 // Resisted / Dodged: No damage taken
                 SpawnCombatText("Resist!", Color.gray);
                 poisonResistedCount++;
+                //LastReward += 1.0f; // Small encouragement for surviving near poison
             }
 
-            // Always consume/respawn the poison dot regardless of whether damage was dealt
+            // Reset distance tracking so respawn teleport isn't counted as movement
+            previousPoisonDistance = -1f;
+            currentPoisonDistance = -1f;
+
             other.gameObject.GetComponent<SpawnItem>()?.Respawn();
         }
         else if (other.CompareTag("Player") || other.CompareTag("Agent"))
@@ -741,18 +756,56 @@ public class AgentController : MonoBehaviour
         if (policyNet != null)
         {
             float[] hidden;
-            float[] probeFood = new float[] { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1f };
-            float[] qFood = policyNet.Forward(probeFood, out hidden);
-            foodScore = qFood[0] - ((qFood[1] + qFood[2] + qFood[3]) / 3f);
 
-            float[] probePoison = new float[] { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1f };
-            float[] qPoison = policyNet.Forward(probePoison, out hidden);
-            poisonPenalty = ((qPoison[1] + qPoison[2] + qPoison[3]) / 3f) - qPoison[0];
+            // Probe 1: Food directly UP (Does agent prefer Action 0: Up over Action 1: Down?)
+            float[] probeFoodUp = new float[] { 0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   0f, 0f,   1f };
+            float[] qFoodUp = policyNet.Forward(probeFoodUp, out hidden);
+            float foodScoreUp = qFoodUp[0] - qFoodUp[1]; // Up vs Down
 
-            if (foodEatenCount > poisonEatenCount * 2 && foodScore > 0f) drive = "Forager";
-            else if (bitesDeliveredCount > 3) drive = "Apex Hunter";
-            else if (poisonPenalty > 0.5f) drive = "Survivalist (Cautious)";
-            else if (epsilon > 0.2f) drive = "Explorer";
+            // Probe 2: Food directly RIGHT (Does agent prefer Action 3: Right over Action 2: Left?)
+            float[] probeFoodRight = new float[] { 0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   0f, 0f,   1f };
+            float[] qFoodRight = policyNet.Forward(probeFoodRight, out hidden);
+            float foodScoreRight = qFoodRight[3] - qFoodRight[2]; // Right vs Left
+
+            foodScore = (foodScoreUp + foodScoreRight) * 0.5f;
+
+            // Probe 3: Poison directly UP (Does agent prefer Action 1: Down/Retreat over Action 0: Up/Hazard?)
+            float[] probePoisonUp = new float[] { 0f, 0f,   0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   1f };
+            float[] qPoisonUp = policyNet.Forward(probePoisonUp, out hidden);
+            float poisonAvoidUp = qPoisonUp[1] - qPoisonUp[0]; // Down (retreat) minus Up (danger)
+
+            // Probe 4: Poison directly RIGHT (Does agent prefer Action 2: Left/Retreat over Action 3: Right/Hazard?)
+            float[] probePoisonRight = new float[] { 0f, 0f,   0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   1f };
+            float[] qPoisonRight = policyNet.Forward(probePoisonRight, out hidden);
+            float poisonAvoidRight = qPoisonRight[2] - qPoisonRight[3]; // Left (retreat) minus Right (danger)
+
+            poisonPenalty = (poisonAvoidUp + poisonAvoidRight) * 0.5f;
+
+            // --- REFINED ARCHETYPE ASSIGNMENT ---
+            if (bitesDeliveredCount >= 2)
+            {
+                drive = "Apex Predator";
+            }
+            else if (foodEatenCount >= 3 && (foodScore > 0f || foodEatenCount > poisonEatenCount))
+            {
+                drive = "Forager";
+            }
+            else if (poisonResistedCount >= 2 || poisonPenalty > 0.005f)
+            {
+                drive = "Cautious Survivor";
+            }
+            else if (lifetime > 45f && foodEatenCount == 0)
+            {
+                drive = "Nomadic Pacifist";
+            }
+            else if (memory != null && memory.Count > 3000 && Mathf.Abs(foodScore) < 0.02f && Mathf.Abs(poisonPenalty) < 0.02f)
+            {
+                drive = "Indecisive Wanderer";
+            }
+            else
+            {
+                drive = "Erratic Explorer";
+            }
         }
 
         int totalMemory = memory != null ? memory.Count : 0;
@@ -770,9 +823,9 @@ public class AgentController : MonoBehaviour
             bitesDelivered = bitesDeliveredCount,
             bitesReceived = bitesReceivedCount,
             
-            // Ensure these exist and are assigned:
             wasEverPossessed = hasBeenPossessed,
             playerObservationsLogged = playerMemoriesImprinted,
+            peerObservationsLogged = peerMemoriesImprinted,
             playerInfluencePercent = influence,
 
             experiencesLogged = totalMemory,
