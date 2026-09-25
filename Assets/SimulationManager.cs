@@ -52,8 +52,10 @@ public class SimulationManager : MonoBehaviour
     private bool simulationRunning = false;
     private bool gameOverTriggered = false;
 
-    [Header("In-Game HUD / Controls")]
+    [Header("In-Game Runtime Controls")]
     public GameObject BtnStopSimulation; // Reference to the stop button
+    public Slider sliderSimulationSpeed;
+    public TextMeshProUGUI txtSpeedValue; // Optional: Displays "1.0x", "2.0x", etc.
 
     [Header("Audio")]
     public AudioSource musicSource;
@@ -62,17 +64,21 @@ public class SimulationManager : MonoBehaviour
     public AgentController currentlyPossessedAgent;
 
     [Header("Setup Panel Controls")]
-    public Toggle toggleRespawn;
+    public Toggle toggleFoodRespawn;
+    public Toggle togglePoisonRespawn;
 
     [Header("Live Running HUD")]
     public TextMeshProUGUI txtRunningStats;
     private float simulationElapsedTime = 0f;
 
-    [Header("Agent Brain Inspection")]
+    [Header("Agent Brain Inspection & Replay")]
     public GameObject brainInspectorPanel;
     public TextMeshProUGUI txtBrainDetails;
+    public Button btnReplayLife;
+    public AgentLifeReplayer lifeReplayer;
+    private AgentController inspectedAgentController;
     private List<AgentRecord> cachedRecords = new List<AgentRecord>();
-
+    
     void Start()
     {
         if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false); //
@@ -99,7 +105,6 @@ public class SimulationManager : MonoBehaviour
 
         if (setupPanel != null) setupPanel.SetActive(true); 
         if (leaderboardPanel != null) leaderboardPanel.SetActive(false); 
-        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false); 
 
         //  Setup Agent Count Slider & bind listener in code
         if (sliderAgents != null) 
@@ -160,16 +165,48 @@ public class SimulationManager : MonoBehaviour
         // Setup Vision Slider & bind listener in code
         if (sliderVision != null) 
         {
+            sliderVision.interactable = true; // Ensure UI interactable flag is ON
             sliderVision.wholeNumbers = true; 
-            sliderVision.minValue = 0f; 
+            sliderVision.minValue = 1f; // Clamped to 1 so vision is never 0
             sliderVision.maxValue = 20f; 
-            sliderVision.value = globalVisionRadius;
 
-            // Automatically updates the food chance text box whenever the slider moves:
+            if (inputVision != null && int.TryParse(inputVision.text, out int v))
+            {
+                sliderVision.value = Mathf.Clamp(v, (int)sliderVision.minValue, (int)sliderVision.maxValue);
+            }
+            else
+            {
+                sliderVision.value = globalVisionRadius;
+            }
+
             sliderVision.onValueChanged.RemoveAllListeners();
-            sliderVision.onValueChanged.AddListener(delegate { UpdateVision(); });
+            sliderVision.onValueChanged.AddListener(delegate { UpdateVisionFromSlider(); });
+
+            if (inputVision != null)
+            {
+                inputVision.onValueChanged.RemoveAllListeners();
+                inputVision.onValueChanged.AddListener(delegate { UpdateVisionFromInput(); });
+            }
 
             Debug.Log("[SimulationManager.cs] - Start() - sliderVision.value = " + sliderVision.value);
+        }
+
+        // Runtime user controls.
+        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false); 
+        if (sliderSimulationSpeed != null)
+        {
+            sliderSimulationSpeed.minValue = 0.5f; // Slow motion
+            sliderSimulationSpeed.maxValue = 5.0f; // 5x speed
+            sliderSimulationSpeed.value = 1.0f;    // Default standard speed
+
+            sliderSimulationSpeed.onValueChanged.RemoveAllListeners();
+            sliderSimulationSpeed.onValueChanged.AddListener(OnSpeedSliderChanged);
+        }
+
+        if (btnReplayLife != null)
+        {
+            btnReplayLife.onClick.RemoveAllListeners();
+            btnReplayLife.onClick.AddListener(StartReplayForCurrentAgent);
         }
     }
 
@@ -209,13 +246,54 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
-    public void UpdateVision()
+    public void UpdateVisionFromSlider()
     {
-        Debug.Log($"[SimulationManager] In UpdateVision!");
-        if (sliderVision != null)
+        if (sliderVision != null && inputVision != null)
         {
-            inputVision.text = Mathf.RoundToInt(sliderVision.value).ToString();
+            inputVision.SetTextWithoutNotify(Mathf.RoundToInt(sliderVision.value).ToString());
+            globalVisionRadius = Mathf.RoundToInt(sliderVision.value);
         }
+    }
+
+    public void UpdateVisionFromInput()
+    {
+        if (inputVision != null && sliderVision != null && int.TryParse(inputVision.text, out int val))
+        {
+            sliderVision.SetValueWithoutNotify(Mathf.Clamp(val, sliderVision.minValue, sliderVision.maxValue));
+            globalVisionRadius = Mathf.RoundToInt(sliderVision.value);
+        }
+    }
+
+    public void StartReplayForCurrentAgent()
+    {
+        if (inspectedAgentController == null)
+        {
+            Debug.LogWarning("[SimulationManager] No agent selected for replay.");
+            return;
+        }
+
+        if (lifeReplayer == null)
+        {
+            Debug.LogError("[SimulationManager] 'Life Replayer' is not assigned in the Inspector!");
+            return;
+        }
+
+        // Hide or dim the brain details panel so the replay view takes focus
+        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false);
+        if (leaderboardPanel != null) leaderboardPanel.SetActive(false);
+
+        // Keep the speed slider active and bring to front if parented under HUD
+        if (sliderSimulationSpeed != null)
+        {
+            sliderSimulationSpeed.gameObject.SetActive(true);
+            sliderSimulationSpeed.transform.SetAsLastSibling();
+            // Apply current slider value to Time.timeScale
+            Time.timeScale = sliderSimulationSpeed.value;
+        }
+
+        lifeReplayer.gameObject.SetActive(true);
+        lifeReplayer.transform.SetAsLastSibling();
+        lifeReplayer.LoadAgent(inspectedAgentController);
     }
 
     public void StartSimulationFromUI()
@@ -224,15 +302,14 @@ public class SimulationManager : MonoBehaviour
         if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(true);
         if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(true);
 
+        // Set speed settings
+        float startSpeed = sliderSimulationSpeed != null ? sliderSimulationSpeed.value : 1f;
+        OnSpeedSliderChanged(startSpeed);
+
         // Set the global respawn rule from the checkbox state
-        if (toggleRespawn != null)
-        {
-            global::SpawnItem.AllowRespawn = toggleRespawn.isOn;
-        }
-        else
-        {
-            global::SpawnItem.AllowRespawn = true;
-        }
+        // Apply independent respawn flags from the UI toggles
+        global::SpawnItem.AllowFoodRespawn = toggleFoodRespawn != null ? toggleFoodRespawn.isOn : true;
+        global::SpawnItem.AllowPoisonRespawn = togglePoisonRespawn != null ? togglePoisonRespawn.isOn : true;
 
         if (sliderAgents != null)
         {
@@ -449,6 +526,15 @@ public class SimulationManager : MonoBehaviour
             return;
         }
 
+        inspectedAgentController = allSpawnedAgents.Find(a => a != null && a.agentIndex == agentId);
+
+        if (btnReplayLife != null)
+        {
+            // Only enable the button if the agent actually has recorded history
+            bool hasHistory = inspectedAgentController != null && inspectedAgentController.lifeHistory != null && inspectedAgentController.lifeHistory.Count > 0;
+            btnReplayLife.interactable = hasHistory;
+        }
+        
         AgentRecord record = cachedRecords[index];
 
         if (brainInspectorPanel != null)
@@ -495,6 +581,14 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
+    public void OnClickStartReplay()
+    {
+        if (inspectedAgentController != null && lifeReplayer != null)
+        {
+            lifeReplayer.gameObject.SetActive(true);
+            lifeReplayer.LoadAgent(inspectedAgentController);
+        }
+    }
 
     private void UpdateRunningStatsHUD()
     {
@@ -745,6 +839,10 @@ public class SimulationManager : MonoBehaviour
         {
             txtLeaderboardBody.gameObject.SetActive(true);
         }
+
+        // Reset speed
+        Time.timeScale = 1f;
+        if (musicSource != null) musicSource.pitch = 1f;
     }
 
     public void OnRestartSameParameters()
@@ -753,10 +851,9 @@ public class SimulationManager : MonoBehaviour
         if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(true);
         if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(true);
 
-        if (toggleRespawn != null)
-        {
-            global::SpawnItem.AllowRespawn = toggleRespawn.isOn;
-        }
+        // Retain the independent respawn settings
+        global::SpawnItem.AllowFoodRespawn = toggleFoodRespawn != null ? toggleFoodRespawn.isOn : true;
+        global::SpawnItem.AllowPoisonRespawn = togglePoisonRespawn != null ? togglePoisonRespawn.isOn : true;
 
         CleanupEnvironment();
 
@@ -808,6 +905,28 @@ public class SimulationManager : MonoBehaviour
         if (musicSource != null && musicSource.isPlaying)
         {
             musicSource.Stop(); // or musicSource.Pause();
+        }
+
+        // Reset Speed
+        Time.timeScale = 1f;
+        if (musicSource != null) musicSource.pitch = 1f;
+    }
+
+    public void OnSpeedSliderChanged(float speed)
+    {
+        // 1. Scale physics, agent timers, and fixed updates
+        Time.timeScale = speed;
+
+        // 2. Adjust music playback speed/pitch proportionally
+        if (musicSource != null)
+        {
+            musicSource.pitch = speed;
+        }
+
+        // 3. Update UI text label if assigned
+        if (txtSpeedValue != null)
+        {
+            txtSpeedValue.text = $"{speed:F1}x";
         }
     }
 
@@ -862,6 +981,10 @@ public class SimulationManager : MonoBehaviour
 
         // 3. Trigger the leaderboard with current stats
         ShowLeaderboard();
+
+        // Reset speed
+        Time.timeScale = 1f;
+        if (musicSource != null) musicSource.pitch = 1f;
     }
 
     public void QuitApplication()

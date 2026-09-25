@@ -30,8 +30,39 @@ public struct AgentRecord
     public float poisonAvoidance;   // Q-value penalty when sensing poison
 }
 
+[System.Serializable]
+public struct AgentSnapshot
+{
+    public float timeStamp;
+    public Vector2 position;
+    public float rotationAngle;
+    public float energy;
+    public int actionTaken;
+    public float reward;
+    public float[] sensorState;
+
+    // --- PEER GHOST VISUALIZATION ---
+    public bool hasThreatVisible;
+    public Vector2 threatWorldPos;
+    public bool hasPreyVisible;
+    public Vector2 preyWorldPos;
+}
+
+[System.Serializable]
+public struct ConsumptionEvent
+{
+    public float timeStamp;
+    public Vector2 position;
+    public string itemType; // "Food" or "Poison"
+}
+
 public class AgentController : MonoBehaviour
 {
+    private Vector2 lastNearestThreatPos;
+    private bool lastHasThreat;
+    private Vector2 lastNearestPreyPos;
+    private bool lastHasPrey;
+
     [Header("Manual Possession")]
     public bool isPossessed = false;
     public float manualMoveSpeed = 5f;
@@ -95,6 +126,8 @@ public class AgentController : MonoBehaviour
     [HideInInspector] public NeuralNetwork policyNet;
     [HideInInspector] public NeuralNetwork targetNet;
     [HideInInspector] public ReplayBuffer memory;
+    [HideInInspector] public List<AgentSnapshot> lifeHistory = new List<AgentSnapshot>(1000);
+    [HideInInspector] public List<ConsumptionEvent> consumptionHistory = new List<ConsumptionEvent>();
 
     private Rigidbody2D rb;
     private Vector2[] actions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
@@ -283,7 +316,6 @@ public class AgentController : MonoBehaviour
         float normX = (transform.position.x / arenaBounds.x) * 2f - 1f;
         float normY = (transform.position.y / arenaBounds.y) * 2f - 1f;
 
-        // Mask out layer 2 ("Ignore Raycast") where corpses reside
         int mask = ~(1 << 2);
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, visionRadius, mask);
 
@@ -297,6 +329,9 @@ public class AgentController : MonoBehaviour
         float minTDist = float.MaxValue;
         float minPreyDist = float.MaxValue;
 
+        lastHasThreat = false;
+        lastHasPrey = false;
+
         foreach (var hit in hits)
         {
             if (hit.gameObject == gameObject) continue;
@@ -309,20 +344,24 @@ public class AgentController : MonoBehaviour
                     float pDist = Vector2.Distance(transform.position, peer.transform.position);
                     Vector2 dirToPeer = ((Vector2)peer.transform.position - (Vector2)transform.position).normalized;
 
-                    if (peer.energy > this.energy)
+                    if (peer.energy >= this.energy)
                     {
                         if (pDist < minTDist)
                         {
                             minTDist = pDist;
                             nearestThreatDir = dirToPeer;
+                            lastNearestThreatPos = peer.transform.position; // RECORD THREAT POS
+                            lastHasThreat = true;                           // SET THREAT FLAG
                         }
                     }
-                    else if (peer.energy < this.energy)
+                    else
                     {
                         if (pDist < minPreyDist)
                         {
                             minPreyDist = pDist;
                             nearestPreyDir = dirToPeer;
+                            lastNearestPreyPos = peer.transform.position;   // RECORD PREY POS
+                            lastHasPrey = true;                             // SET PREY FLAG
                         }
                     }
                 }
@@ -343,7 +382,6 @@ public class AgentController : MonoBehaviour
             }
         }
 
-        // Track nearest food and poison distance for reward shaping (-1 if not in sight)
         currentFoodDistance = (minFDist < float.MaxValue) ? minFDist : -1f;
         currentPoisonDistance = (minPDist < float.MaxValue) ? minPDist : -1f;
 
@@ -471,8 +509,24 @@ public class AgentController : MonoBehaviour
         }
         previousPoisonDistance = currentPoisonDistance;
 
-        energy -= 0.04f;
-        LastReward -= 0.005f;
+        // --- RECORD SNAPSHOT HERE (Captures live shaped reward and collisions) ---
+        if (decisionCooldown == dynamicInterval)
+        {
+            lifeHistory.Add(new AgentSnapshot
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                rotationAngle = transform.eulerAngles.z,
+                energy = energy,
+                actionTaken = LastAction,
+                reward = LastReward,
+                sensorState = (float[])LastState.Clone(),
+                hasThreatVisible = lastHasThreat,
+                threatWorldPos = lastNearestThreatPos,
+                hasPreyVisible = lastHasPrey,
+                preyWorldPos = lastNearestPreyPos
+            });
+        }
 
         if (energy <= 0f) Die();
     }
@@ -546,6 +600,14 @@ public class AgentController : MonoBehaviour
             LastReward += 10f;
             foodEatenCount++;
 
+            // --- RECORD FOOD CONSUMPTION GHOST ---
+            consumptionHistory.Add(new ConsumptionEvent
+            {
+                timeStamp = lifetime,
+                position = other.transform.position,
+                itemType = "Food"
+            });
+
             if (audioSource != null && foodEatClip != null)
             {
                 audioSource.PlayOneShot(foodEatClip, soundVolume);
@@ -555,6 +617,14 @@ public class AgentController : MonoBehaviour
         }
         else if (other.CompareTag("Poison"))
         {
+            // Record poison encounter regardless of whether damage was resisted or taken
+            consumptionHistory.Add(new ConsumptionEvent
+            {
+                timeStamp = lifetime,
+                position = other.transform.position,
+                itemType = "Poison"
+            });
+
             if (Random.value < SimulationManager.PoisonDamageChance)
             {
                 poisonEatenCount++;
@@ -600,8 +670,6 @@ public class AgentController : MonoBehaviour
 
     private void ResolveLifeSteal(AgentController peer)
     {
-        Debug.Log($"[Combat] Agent #{agentIndex} collided with Agent #{peer.agentIndex}. Energy: {this.energy} vs {peer.energy}");
-
         if (!isAlive || peer == null || !peer.isAlive || peer.energy <= 0f) return;
 
         if (this.energy >= peer.energy)
@@ -617,13 +685,32 @@ public class AgentController : MonoBehaviour
             this.lastSiphonTime = Time.time;
             bitesDeliveredCount++;
 
+            // 1. Log attack audio/event
+            consumptionHistory.Add(new ConsumptionEvent
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                itemType = "Attack"
+            });
+
+            // 2. Force a snapshot capture of this prey right at the moment of the bite
+            lifeHistory.Add(new AgentSnapshot
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                rotationAngle = transform.eulerAngles.z,
+                energy = energy,
+                actionTaken = LastAction,
+                reward = LastReward,
+                sensorState = LastState != null ? (float[])LastState.Clone() : new float[11],
+                hasThreatVisible = false,
+                hasPreyVisible = true,
+                preyWorldPos = peer.transform.position // Exact position of victim
+            });
+
             if (swordClashClip != null && audioSource != null)
             {
                 audioSource.PlayOneShot(swordClashClip, soundVolume);
-            }
-            if (swordClashClip == null)
-            {
-                Debug.LogError($"[Audio] Agent #{agentIndex} collided, but swordClashClip is NULL!");
             }
 
             StartCoroutine(FlashColor(Color.magenta, 0.15f));
@@ -640,6 +727,32 @@ public class AgentController : MonoBehaviour
         energy -= amount;
         bitesReceivedCount++;
         LastReward -= 10f;
+
+        // 1. Log attacked audio/event
+        consumptionHistory.Add(new ConsumptionEvent
+        {
+            timeStamp = lifetime,
+            position = transform.position,
+            itemType = "Attacked"
+        });
+
+        // 2. Force a snapshot capture showing the predator attacking us
+        if (attacker != null)
+        {
+            lifeHistory.Add(new AgentSnapshot
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                rotationAngle = transform.eulerAngles.z,
+                energy = energy,
+                actionTaken = LastAction,
+                reward = LastReward,
+                sensorState = LastState != null ? (float[])LastState.Clone() : new float[11],
+                hasThreatVisible = true,
+                threatWorldPos = attacker.transform.position, // Exact position of attacker
+                hasPreyVisible = false
+            });
+        }
 
         StartCoroutine(FlashColor(Color.red, 0.15f));
         SpawnCombatText($"-{amount:F0}", new Color(1f, 0.25f, 0.25f));
