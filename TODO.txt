@@ -1,0 +1,2 @@
+(1)  Move the "Replay Life" button to the Leaderboard.  Add checkmark next to each agent in the list.  All agents checked will be present in the replay.  We will keep the yellow dots for agents that were not selected in the replay.
+
