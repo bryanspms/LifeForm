@@ -59,6 +59,7 @@ public class SimulationManager : MonoBehaviour
 
     [Header("Audio")]
     public AudioSource musicSource;
+    public AudioClip introSoundClip;
 
     [Header("Possession Management")]
     public AgentController currentlyPossessedAgent;
@@ -78,6 +79,7 @@ public class SimulationManager : MonoBehaviour
     public AgentLifeReplayer lifeReplayer;
     private AgentController inspectedAgentController;
     private List<AgentRecord> cachedRecords = new List<AgentRecord>();
+    
     
     void Start()
     {
@@ -210,6 +212,15 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
+    void Awake()
+    {
+        if (introSoundClip != null)
+        {
+            // Plays cleanly at full volume without needing an active AudioSource component
+            AudioSource.PlayClipAtPoint(introSoundClip, Camera.main != null ? Camera.main.transform.position : Vector3.zero, 1f);
+        }
+    }
+
     public void UpdateNumberOfAgents()
     {
         Debug.Log($"[SimulationManager] In UpdateNumberOfAgents!");
@@ -289,6 +300,10 @@ public class SimulationManager : MonoBehaviour
             sliderSimulationSpeed.transform.SetAsLastSibling();
             // Apply current slider value to Time.timeScale
             Time.timeScale = sliderSimulationSpeed.value;
+        }
+        else
+        {
+            Time.timeScale = 1f;
         }
 
         lifeReplayer.gameObject.SetActive(true);

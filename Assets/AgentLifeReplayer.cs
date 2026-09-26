@@ -12,6 +12,7 @@ public class AgentLifeReplayer : MonoBehaviour
     public TextMeshProUGUI txtPlayPauseLabel;
     public TextMeshProUGUI txtTimestamp;
     public TextMeshProUGUI txtStepStats;
+    public TextMeshProUGUI txtLegend;
 
     [Header("Replay Dummy/Ghost")]
     public Transform ghostAgentTransform;
@@ -140,6 +141,15 @@ public class AgentLifeReplayer : MonoBehaviour
             threatSensorLine.endColor = new Color(0.9f, 0.1f, 0.9f, 0.1f);
         }
 
+        if (txtLegend != null)
+        {
+            txtLegend.text = "<b><size=110%>Sensory Vectors</size></b>\n" +
+                             "<color=#33FF33>■</color> Nearest Food\n" +
+                             "<color=#FF3333>■</color> Nearest Hazard (Poison)\n" +
+                             "<color=#FFC000>■</color> Prey Target (Weaker)\n" +
+                             "<color=#E600E6>■</color> Threat (Predator)";
+        }
+
         replayAudioSource = gameObject.GetComponent<AudioSource>();
         if (replayAudioSource == null)
         {
@@ -174,6 +184,23 @@ public class AgentLifeReplayer : MonoBehaviour
         {
             Debug.LogWarning("[Replayer] No recorded history for this agent.");
             return;
+        }
+
+        // --- FORCE LEGEND ACTIVE & VISIBLE ---
+        if (txtLegend != null)
+        {
+            txtLegend.gameObject.SetActive(true);
+            txtLegend.enabled = true;
+
+            // Set base text alpha to ~75% opacity (0.75f)
+            txtLegend.color = new Color(1f, 1f, 1f, 0.75f);
+
+            txtLegend.text = "<b><size=110%><color=#FFFFFFB0>Sensory Vectors</color></size></b>\n" +
+                 "<color=#33FF33B0><b>**</b></color> Nearest Food\n" +
+                 "<color=#FF3333B0><b>**</b></color> Nearest Hazard (Poison)\n" +
+                 "<color=#FFC000B0><b>**</b></color> Prey Target (Weaker)\n" +
+                 "<color=#E600E6B0><b>**</b></color> Threat (Predator)";
+            txtLegend.ForceMeshUpdate();
         }
 
         // Copy audio clips directly from the agent
@@ -520,6 +547,7 @@ public class AgentLifeReplayer : MonoBehaviour
         if (threatSensorLine != null) threatSensorLine.enabled = false;
         if (threatGhostRenderer != null) threatGhostRenderer.gameObject.SetActive(false);
         if (preyGhostRenderer != null) preyGhostRenderer.gameObject.SetActive(false);
+        if (txtLegend != null) txtLegend.gameObject.SetActive(false);
 
         gameObject.SetActive(false);
 

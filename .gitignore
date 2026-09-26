@@ -1,3 +1,8 @@
+# Plastic SCM / Unity Version Control metadata
+.plastic/
+*.private/
+*.wk/
+
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -13,7 +18,9 @@ Recordings/
 .idea/
 
 *.csproj
+*.unityproj
 *.sln
+*.suo
 *.user
 
 UnityPlayer.so
