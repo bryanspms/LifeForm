@@ -1,7 +1,11 @@
-# Plastic SCM / Unity Version Control metadata
+# Plastic SCM / Unity Version Control internals
 .plastic/
-*.private/
-*.wk/
+*.plastic
+plastic.workspace
+plastic.wktree
+plastic.changes
+*.wk
+*.private.*
 
 [Ll]ibrary/
 [Tt]emp/
