@@ -1,20 +1,35 @@
+##LifeForm
+
+**LifeForm** is an interactive 2D artificial life and reinforcement learning simulation developed in Unity (C#). Organisms inhabit an enclosed ecosystem where they search for food, avoid lethal hazards, compete for energy through predatory siphoning, and continuously adapt their behaviors through real-time training and imitation.
+
+The project features a **Life Replayer** system that allows users to step frame-by-frame through any organism's full lifespan to examine its neural decisions, directional sensors, peer encounters, and feeding locations.
+
+---
+
+## Visual Overview
+
+| Arena Simulation | Setup Menu |
+| ---------------- | ---------- |
+| ![Alt text](LifeForm-Arena.png) | ![Alt text](LifeForm-Setup.png) |
+
+| Post-Simulation Leaderboard | Brain & Archetype Inspection |
+| --------------------------- | ---------------------------- |
+| ![Alt text](LifeForm-Leaderboard.png) | ![Alt text](LifeForm-Brain-Summary.png) |
+
+| Life Replayer |
+| ------------- |
+|               |
+
+
+---
+
 # LifeForm
 
-An artificial life simulation built with Unity that explores reinforcement learning, social learning, predation, survival, and human-guided behavioral training.
+**LifeForm** is an interactive 2D artificial life and reinforcement learning simulation developed in Unity (C#).  It is designed to explore reinforcement learning, social learning, predation, survival, and human-guided behavioral training. 
 
-![Alt text](LifeForm-Setup.png) ![Alt text](LifeForm-Arena.png) ![Alt text](LifeForm-Leaderboard.png) ![Alt text](LifeForm-Brain-Summary.png) 
+Organisms inhabit an enclosed ecosystem where they search for food, avoid lethal hazards, compete for energy through predatory siphoning, and continuously adapt their behaviors through real-time training and imitation.
 
-## Overview
-
-LifeForm is a multi-agent ecosystem where autonomous organisms learn to survive by:
-
-- Finding food
-- Avoiding poison
-- Escaping stronger organisms
-- Hunting weaker organisms
-- Learning from direct experience
-- Learning from observing peers
-- Learning from human-controlled demonstrations
+The project features a **Life Replayer** system that allows users to step frame-by-frame through any organism's full lifespan to examine its neural decisions, directional sensors, peer encounters, and feeding locations.
 
 ---
 
@@ -31,7 +46,7 @@ Experience Replay
         +
 Peer Observation
         +
-Human Demonstration
+Human-Controlled Demonstration
         +
 Predator / Prey Dynamics
         =
@@ -39,6 +54,53 @@ Emergent Intelligence
 ```
 
 The result is an ecosystem where learning can spread through observation, teaching, and adaptation rather than hardcoded behavior.
+
+---
+
+## Core Systems
+
+### 1. Neural Architecture & Reinforcement Learning
+
+- **Deep Q-Network (DQN)**: Each organism processes an 11-input observation vector through an onboard neural network to select discrete directional maneuvers (Up, Down, Left, Right).
+- **Imitation & Peer Observation**: Organisms monitor other agents within their field of view and push discounted peer experiences to their circular replay memory.
+- **Distance-Based Reward Shaping**: Subtle directional scent trails reward moving toward food and penalize steering closer to poison, helping bootstrap navigation before chance collisions occur.
+- **Desperation Scaling**: Lower health levels dynamically shorten decision cooldown intervals and increase turning responsiveness, producing rapid evasion maneuvers when starving.
+
+### 2. Predation & Combat Mechanics
+
+- **Predatory Siphoning**: When two organisms collide, the individual with higher energy drains up to 15 points of energy from the weaker prey, accompanied by combat impact audio and floating green/red damage indicators.
+- **Knockback & Evasion**: Damaged prey organisms execute an instant burst of escape velocity directly away from the predator.
+- **Selective Foraging**: Poison consumption evaluates against a configurable damage chance, enabling organisms with cautious policies to resist lethal penalties.
+
+### 3. Interactive Player Possession
+
+- **Direct Control**: Click any live agent or cycle via gamepad/keyboard to manually pilot an organism across the arena.
+- **Behavioral Imprinting**: Nearby autonomous organisms observe player-driven actions, directly imprinting user behaviors into their neural replay buffers and altering their evolutionary profiles.
+- **Cursor Inspection**: Hovering over any organism halts its linear momentum to allow close inspection of its dynamic HUD without stopping the global simulation.
+
+### 4. Post-Mortem Analytics & Life Replayer
+
+- **Automated Leaderboard**: Summarizes survival times, food ingested, poison resisted, damage inflicted/sustained, and player memory influence percentages upon extinction or manual stop.
+- **Cognitive Archetype Classifier**: Evaluates directional policy probes to diagnose survival styles, including *Apex Predator*, *Forager*, *Cautious Survivor*, *Indecisive Wanderer*, and *Erratic Explorer*.
+- **Frame-by-Frame Timeline**: Scrub backwards and forwards through an agent's recorded history with synchronized audio and step-by-step telemetry.
+- **Dynamic Dashed Vision Cone**: Displays the agent's exact visual field-of-view angle and scan depth during playback.
+- **Combat Peer Holograms**: Spawns translucent holograms of other organisms at the exact coordinates where attacks or evasions took place.
+- **Consumption Event Markers**: Places persistent translucent ghost markers across the arena floor highlighting where food and poison items were consumed.
+- **Sensory HUD Legend**: An in-engine, translucent HUD overlay identifying each active sensory ray.
+
+---
+
+## Sensory Vector Legend
+
+During life replay, sensory vectors render from the agent's center to indicate its input layer state:
+
+| Ray / Indicator | Color | Representation |
+| --- | --- | --- |
+| **Nearest Food** | **Green** (`#33FF33`) | Vector directed toward the closest detected food item. |
+| **Nearest Hazard** | **Red** (`#FF3333`) | Vector pointing toward the closest detected poison hazard. |
+| **Prey Target** | **Amber / Gold** (`#FFC000`) | Vector tracking the nearest weaker organism eligible for siphoning. |
+| **Threat (Predator)** | **Magenta / Purple** (`#E600E6`) | Vector tracking the nearest stronger organism posing an attack hazard. |
+| **Vision Cone Arc** | **Translucent Dashed Green** | Outlines the active field of view angle and peripheral detection limit. |
 
 ---
 
@@ -56,21 +118,23 @@ cd LifeForm
 
 ---
 
-## Quick Start for SteamDeck (download files)
+## Quick Start for **SteamDeck** (download files)
 
 To recombine and unpack your split archive (due to GitHub's 25GB limit), you only need to run the extraction command on the first part (.001). 7-Zip will automatically locate, merge, and unpack all subsequent parts in the sequence as long as they reside in the same folder.
 
 1.Download the following files:
-    -    LifeForm.x86_64_Parts.7z.001
-    -    LifeForm.x86_64_Parts.7z.002
+    -    LifeForm-Release.7z.001
+    -    LifeForm-Release.7z.002
 2. Open Terminal and navigate to the foler containing the 2 7zip files.
 3. Enter the commands:
+
 ```bash
-7z x LifeForm.x86_64_Parts.001 -o"/home/deck/games/simulation/LifeForm"
+7z x LifeForm-Release.001 -o"/home/deck/games/simulation/LifeForm"
 cd /home/deck/games/simulation/LifeForm
 chmod +x LifeForm.x86_64
 ./LifeForm.x86_64
 ```
+
    **NOTE:**  -o"/home/deck/games/simulation/LifeForm" is the output folder for the ziped file parts.  Modify the path where ever you choose to install it.
 4. Observe the ecosystem evolve.
 
@@ -561,8 +625,6 @@ Arrow Keys
 Left Stick
 D-Pad
 ```
-
-
 
 ---
 
