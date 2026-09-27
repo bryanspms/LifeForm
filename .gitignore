@@ -25,3 +25,5 @@ Recordings/
 
 UnityPlayer.so
 .plastic/
+*.private.*
+*.00*
