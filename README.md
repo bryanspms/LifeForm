@@ -4,19 +4,16 @@ An artificial life simulation built with Unity that explores reinforcement learn
 
 #### Application snapshots
 
-        Setup:
-        
+        Setup:        
 ![Alt text](LifeForm-Setup.png)
 
-        Arena:
-        
+        Arena:        
 ![Alt text](LifeForm-Arena.png)
 
-        Leaderboard
+        Leaderboard:        
 ![Alt text](LifeForm-Leaderboard.png)
 
-        Replay Arena:
-        
+        Replay Arena:        
 ![Alt text](LifeForm-ReplayArena.png)
 
         Brain Summary:
