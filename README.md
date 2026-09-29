@@ -2,7 +2,26 @@
 
 An artificial life simulation built with Unity that explores reinforcement learning, social learning, predation, survival, and human-guided behavioral training.
 
-![Alt text](LifeForm-Setup.png) ![Alt text](LifeForm-Arena.png) ![Alt text](LifeForm-Leaderboard.png) ![Alt text](LifeForm-Brain-Summary.png) 
+#### Application snapshots
+
+        Setup:
+        
+![Alt text](LifeForm-Setup.png)
+
+        Arena:
+        
+![Alt text](LifeForm-Arena.png)
+
+        Leaderboard
+![Alt text](LifeForm-Leaderboard.png)
+
+        Replay Arena:
+        
+![Alt text](LifeForm-ReplayArena.png)
+
+        Brain Summary:
+![Alt text](LifeForm-Brain-Summary.png)
+
 
 ## Overview
 
