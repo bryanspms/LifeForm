@@ -42,38 +42,81 @@ The result is an ecosystem where learning can spread through observation, teachi
 
 ---
 
-## Quick Start for Unity (download project)
+## Download & Installation (Standalone Releases)
 
-```bash
-git clone https://github.com/bryanspms/LifeForm.git
-cd LifeForm
-```
+Due to file size constraints, standalone release packages are distributed as split archives (`.z01`, `.z02`, ... and `.zip`). 
 
-1. Open the project in Unity Hub.
-2. Load `Assets/LifeFormScene.unity`.
-3. Press **Play**.
-4. Observe the ecosystem evolve.
+Ensure all archive parts for your operating system are downloaded into the **same folder** before extracting.
 
 ---
 
-## Quick Start for SteamDeck (download files)
+## Linux Installation (Ubuntu, Desktop Linux & Steam Deck)
 
-To recombine and unpack your split archive (due to GitHub's 25GB limit), you only need to run the extraction command on the first part (.001). 7-Zip will automatically locate, merge, and unpack all subsequent parts in the sequence as long as they reside in the same folder.
+1. Download all split archive parts for Linux:
+   * `LifeForm-Linux.z01`
+   * `LifeForm-Linux.z02` (and any subsequent `.z0x` parts)
+   * `LifeForm-Linux.zip`
+2. Open your terminal and navigate to the directory containing the downloaded files:
+   
+   ```bash
+   cd ~/Downloads
+   ```
 
-1.Download the following files:
-    -    LifeForm.x86_64_Parts.7z.001
-    -    LifeForm.x86_64_Parts.7z.002
-2. Open Terminal and navigate to the foler containing the 2 7zip files.
-3. Enter the commands:
-```bash
-7z x LifeForm.x86_64_Parts.001 -o"/home/deck/games/simulation/LifeForm"
-cd /home/deck/games/simulation/LifeForm
-chmod +x LifeForm.x86_64
-./LifeForm.x86_64
-```
-   **NOTE:**  -o"/home/deck/games/simulation/LifeForm" is the output folder for the ziped file parts.  Modify the path where ever you choose to install it.
-4. Add LifeForm as a non-Steam Game
-5. Launch and enjoy.
+## Recombine the split files into a single archive and extract:
+
+### Combine the split files into a unified archive
+
+zip -s 0 LifeForm-Linux.zip --out LifeForm-Linux-Complete.zip
+
+### Extract to your desired installation directory
+
+unzip LifeForm-Linux-Complete.zip -d ~/Games/LifeForm
+
+### Set execution permissions and run:
+
+`cd ~/Games/LifeForm/LifeForm-Linux`
+`chmod +x LifeForm.x86_64`
+`./LifeForm.x86_64`
+
+#### ****For Steam Deck and Steam Desktop users: In Desktop Mode, open the Steam Client, click Games > Add a Non-Steam Game to My Library, browse to ~/Games/LifeForm/LifeForm-Linux/LifeForm.x86_64, add it, and return to Gaming Mode).
+
+---
+
+## Windows Installation
+
+1. Download all split archive parts for Windows into the same folder:
+   
+        LifeForm-Windows.z01
+       
+        LifeForm-Windows.z02 (and any subsequent .z0x parts)
+       
+        LifeForm-Windows.zip
+
+### Option A: Using 7-Zip or WinRAR (Recommended)
+
+1. Right-click on the base LifeForm-Windows.zip file.
+2. Select 7-Zip > Extract to "LifeForm-Windows" (or WinRAR > Extract to...).   
+        7-Zip and WinRAR automatically detect and reassemble all .z01, .z02, etc., parts in sequence.
+3. Open the extracted folder and double-click LifeForm.exe to launch.
+
+### Option B: Using Windows PowerShell (No third-party tools)
+
+1. If 7-Zip or WinRAR is not installed, open PowerShell in the download folder and merge the parts:
+
+   `# Combine the parts into a single archive`
+   `cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip`
+
+### Extract the archive
+
+Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
+
+        
+        `# Combine the parts into a single archive`
+        `cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip`
+        `# Extract the archive
+        Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows`
+        
+Launch by double-clicking LifeForm.exe inside LifeForm-Windows.
 
 ---
 
@@ -562,8 +605,6 @@ Arrow Keys
 Left Stick
 D-Pad
 ```
-
-
 
 ---
 
