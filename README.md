@@ -1,3 +1,62 @@
+Skip to content
+bryanspms
+LifeForm
+Repository navigation
+Code
+Issues
+Pull requests
+Agents
+Actions
+Projects
+Wiki
+Security and quality
+Insights
+Settings
+Files
+Go to file
+t
+T
+Assets
+LifeForm_BackUpThisFolder_ButDontShipItWithYourGame
+LifeForm_Data
+Packages
+ProjectSettings
+UIElementsSchema
+.gitignore
+LICENSE.txt
+LifeForm-Arena.png
+LifeForm-Brain-Summary.png
+LifeForm-Leaderboard.png
+LifeForm-Linux.z01
+LifeForm-Linux.z02
+LifeForm-Linux.zip
+LifeForm-Setup.png
+LifeForm-Windows.z01
+LifeForm-Windows.z02
+LifeForm-Windows.zip
+LifeForm.x86_64
+LifeForm_s.debug
+README.md
+TODO.txt
+UnityPlayer_s.debug
+ignore.conf
+libdecor-0.so.0
+libdecor-cairo.so
+LifeForm
+/README.md
+bryanspms
+bryanspms
+Revise README for Steam Deck and Windows installation
+a8b3d2b
+ · 
+now
+
+Preview
+
+Code
+
+Blame
+761 lines (491 loc) · 12.5 KB
 # LifeForm
 
 An artificial life simulation built with Unity that explores reinforcement learning, social learning, predation, survival, and human-guided behavioral training.
@@ -596,6 +655,12 @@ Expected behavior:
 
 ---
 
+## Documentation
+
+- **[Operational Guide](LifeForm-Operational-Guide.md)**: High-level architectural overview, arena controls, human demonstration steps, and replay analysis.
+
+---
+
 ## Controls
 
 ### Keyboard
@@ -759,3 +824,4 @@ If you build upon LifeForm, attribution is appreciated.
 Suggested attribution:
 
 "Based on LifeForm (github.com/bryanspms/LifeForm) by Bryan Price"
+ 
