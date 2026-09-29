@@ -75,10 +75,20 @@ unzip LifeForm-Linux-Complete.zip -d ~/Games/LifeForm
 ### Set execution permissions and run:
 
 `cd ~/Games/LifeForm/LifeForm-Linux`
+
 `chmod +x LifeForm.x86_64`
+
 `./LifeForm.x86_64`
 
-#### ****For Steam Deck and Steam Desktop users: In Desktop Mode, open the Steam Client, click Games > Add a Non-Steam Game to My Library, browse to ~/Games/LifeForm/LifeForm-Linux/LifeForm.x86_64, add it, and return to Gaming Mode).
+\*\*For Steam Deck and Steam Desktop users:\*\*
+
+In Desktop Mode:
+
+        1. open the Steam Client
+        
+        2. click Games > Add a Non-Steam Game to My Library
+        
+        3. browse to ~/Games/LifeForm/LifeForm-Linux/LifeForm.x86_64, add it, and return to Gaming Mode
 
 ---
 
@@ -103,19 +113,20 @@ unzip LifeForm-Linux-Complete.zip -d ~/Games/LifeForm
 
 1. If 7-Zip or WinRAR is not installed, open PowerShell in the download folder and merge the parts:
 
-   `# Combine the parts into a single archive`
-   `cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip`
-
-### Extract the archive
-
-Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
-
-        
-        `# Combine the parts into a single archive`
-        `cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip`
-        `# Extract the archive
-        Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows`
-        
+        ```
+        # Combine the parts into a single archive
+        cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
+   
+        #Extract the archive
+        Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
+   
+        # Combine the parts into a single archive
+        cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
+   
+        # Extract the archive
+        Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
+        ```
+   
 Launch by double-clicking LifeForm.exe inside LifeForm-Windows.
 
 ---
