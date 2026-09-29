@@ -145,10 +145,15 @@ MonoBehaviour:
     outputDim: 0
     b1: []
     b2: []
+  lifeHistory: []
+  consumptionHistory: []
   isHovered: 0
   hasBeenPossessed: 0
   playerMemoriesImprinted: 0
+  peerMemoriesImprinted: 0
   deadSprite: {fileID: -4877062190564190466, guid: 1a6a9563a8637a872a7cf15bd3e637fb, type: 3}
+  aliveSprite: {fileID: 0}
+  combatTextPrefab: {fileID: 5803082682146875728, guid: be2bfb7a01f4d75bfb2da0f6da751e89, type: 3}
 --- !u!58 &-2933207035233189236
 CircleCollider2D:
   m_ObjectHideFlags: 0

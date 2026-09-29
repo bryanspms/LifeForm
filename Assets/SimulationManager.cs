@@ -79,6 +79,9 @@ public class SimulationManager : MonoBehaviour
     public AgentLifeReplayer lifeReplayer;
     private AgentController inspectedAgentController;
     private List<AgentRecord> cachedRecords = new List<AgentRecord>();
+
+    private HashSet<int> selectedAgentIds = new HashSet<int>();
+    public Button btnReplaySelected;
     
     
     void Start()
@@ -465,13 +468,132 @@ public class SimulationManager : MonoBehaviour
                 string linkId = linkInfo.GetLinkID();
                 
                 Debug.Log($"<color=cyan>[UI] Clicked Link ID: {linkId}</color>");
-
+                /*
                 if (int.TryParse(linkId, out int clickedAgentId))
                 {
                     DisplayAgentBrain(clickedAgentId);
+                }*/
+                if (int.TryParse(linkId, out int clickedAgentId))
+                {
+                    // Toggle multi-selection
+                    if (selectedAgentIds.Contains(clickedAgentId))
+                        selectedAgentIds.Remove(clickedAgentId);
+                    else
+                        selectedAgentIds.Add(clickedAgentId);
+
+                    UpdateLeaderboardVisualSelection();
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Re-renders the leaderboard text body to show [X] checkboxes and highlights on selected agents.
+    /// </summary>
+    private void UpdateLeaderboardVisualSelection()
+    {
+        if (txtLeaderboardBody == null || cachedRecords == null || cachedRecords.Count == 0) return;
+
+        int livingCount = activeAgents.Count(a => a != null && a.isAlive);
+        int deadCount = allSpawnedAgents.Count - livingCount;
+
+        int totalFoodEaten = 0;
+        int totalPoisonEaten = 0;
+        int totalPoisonResisted = 0;
+        int totalBitesDelivered = 0;
+        int totalBitesReceived = 0;
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine("<b><color=#AAAAAA>SEL<pos=45>RANK<pos=95>AGENT<pos=185>LIVED<pos=255>FOOD<pos=325>POISON<pos=415>RESIST<pos=505>GAVE DMG<pos=615>TOOK DMG<pos=730>IMPRINT</color></b>");
+        sb.AppendLine("<color=#555555>---------------------------------------------------------------------------------------------------------------------------------</color>");
+
+        for (int i = 0; i < cachedRecords.Count; i++)
+        {
+            AgentRecord r = cachedRecords[i];
+            bool isSelected = selectedAgentIds != null && selectedAgentIds.Contains(r.agentId);
+
+            // Selection toggle box
+            string selectBox = isSelected 
+                ? "<color=#00FFFF><b>[X]</b></color>" 
+                : "<color=#555555>[ ]</color>";
+
+            string rank = (i == 0) ? "<color=#FFD700>#1 *</color>" : $"#{i + 1}";
+            string agentColor = isSelected ? "#00FFFF" : "#FFFFFF";
+            string agentLink = $"<link=\"{r.agentId}\"><color={agentColor}><u>Agent #{r.agentId}</u></color></link>";
+
+            string imprintDisplay;
+            if (r.wasEverPossessed)
+            {
+                imprintDisplay = "<color=#00FFFF>POSSESSED</color>";
+            }
+            else if (r.playerObservationsLogged > 0)
+            {
+                imprintDisplay = $"<color=#55FF55>{r.playerObservationsLogged}</color> <size=80%><color=#AAAAAA>({r.playerInfluencePercent:F0}%)</color></size>";
+            }
+            else
+            {
+                imprintDisplay = "<color=#555555>0 (0%)</color>";
+            }
+
+            sb.AppendLine($"{selectBox}<pos=45>{rank}<pos=95>{agentLink}<pos=185>{r.survivalTime:F1}s<pos=255>{r.foodEaten}<pos=325>{r.poisonEaten}<pos=415>{r.poisonResisted}<pos=505>{r.bitesDelivered}<pos=615>{r.bitesReceived}<pos=730>{imprintDisplay}");
+
+            totalFoodEaten += r.foodEaten;
+            totalPoisonEaten += r.poisonEaten;
+            totalPoisonResisted += r.poisonResisted;
+            totalBitesDelivered += r.bitesDelivered;
+            totalBitesReceived += r.bitesReceived;
+        }
+
+        sb.AppendLine("<color=#555555>---------------------------------------------------------------------------------------------------------------------------------</color>");
+
+        sb.AppendLine($"<b><color=#FFFFFF>TOTALS</color></b>" +
+                      $"<pos=255><b><color=#55FF55>{totalFoodEaten}</color></b>" +
+                      $"<pos=325><b><color=#FF5555>{totalPoisonEaten}</color></b>" +
+                      $"<pos=415><b><color=#00FFFF>{totalPoisonResisted}</color></b>" +
+                      $"<pos=505><b><color=#FFD700>{totalBitesDelivered}</color></b>" +
+                      $"<pos=615><b><color=#FFAAAA>{totalBitesReceived}</color></b>");
+
+        sb.AppendLine($"<b><color=#AAAAAA>AGENTS:</color></b> <color=#55FF55>{livingCount} Alive</color>  |  <color=#FF5555>{deadCount} Dead</color> <size=85%><color=#888888>({allSpawnedAgents.Count} Total)</color></size>");
+
+        txtLeaderboardBody.text = sb.ToString();
+        txtLeaderboardBody.ForceMeshUpdate();
+
+        // Update button text / state if assigned
+        if (btnReplaySelected != null)
+        {
+            btnReplaySelected.interactable = selectedAgentIds.Count > 0;
+            var btnText = btnReplaySelected.GetComponentInChildren<TextMeshProUGUI>();
+            if (btnText != null)
+            {
+                btnText.text = selectedAgentIds.Count > 0 
+                    ? $"Replay Selected ({selectedAgentIds.Count})" 
+                    : "Replay Selected";
+            }
+        }
+    }
+
+    public void StartMultiAgentReplay()
+    {
+        if (selectedAgentIds.Count == 0) return;
+
+        List<AgentController> targets = allSpawnedAgents
+            .Where(a => a != null && selectedAgentIds.Contains(a.agentIndex))
+            .ToList();
+
+        // Temporarily hide original dead agent GameObjects so they don't block the ghosts
+        foreach (var agent in allSpawnedAgents)
+        {
+            if (agent != null) agent.gameObject.SetActive(false);
+        }
+
+        if (leaderboardPanel != null) leaderboardPanel.SetActive(false);
+        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false);
+
+        lifeReplayer.gameObject.SetActive(true);
+        lifeReplayer.transform.SetAsLastSibling();
+        
+        // Pass both selected targets and allSpawnedAgents
+        lifeReplayer.LoadSelectedAgents(targets, allSpawnedAgents);
     }
 
     private void HandleLeaderboardHover()
@@ -858,6 +980,9 @@ public class SimulationManager : MonoBehaviour
         // Reset speed
         Time.timeScale = 1f;
         if (musicSource != null) musicSource.pitch = 1f;
+
+        // Clear selected agents for replay
+        selectedAgentIds.Clear();
     }
 
     public void OnRestartSameParameters()
@@ -972,6 +1097,9 @@ public class SimulationManager : MonoBehaviour
 
         stepCounter = 0;
         ReleaseCurrentAgent();
+
+        // Clear selected agents for replay
+        selectedAgentIds.Clear();
     }
 
     // Call this from the UI Button or by pressing the Escape key

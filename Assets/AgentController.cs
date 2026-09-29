@@ -160,12 +160,16 @@ public class AgentController : MonoBehaviour
 
     [Header("Visuals & Death")]
     public Sprite deadSprite; // Assign the death slice from your sprite sheet in the Inspector
+    [HideInInspector] public Sprite aliveSprite; // Cache the live appearance
 
     // Distance-based reward shaping
     private float previousFoodDistance = -1f;
     private float currentFoodDistance = -1f;
     private float previousPoisonDistance = -1f;
     private float currentPoisonDistance = -1f;
+
+    [Header("VFX")]
+    public GameObject combatTextPrefab;
 
     void Awake()
     {
@@ -176,6 +180,7 @@ public class AgentController : MonoBehaviour
         if (sr != null)
         {
             defaultColor = sr.color;
+            aliveSprite = sr.sprite; // Capture the living sprite on spawn
         }
 
         policyNet = new NeuralNetwork(11, 32, 4);
@@ -600,6 +605,8 @@ public class AgentController : MonoBehaviour
             LastReward += 10f;
             foodEatenCount++;
 
+            SpawnFloatingText(transform.position, 30, false);
+
             // --- RECORD FOOD CONSUMPTION GHOST ---
             consumptionHistory.Add(new ConsumptionEvent
             {
@@ -630,6 +637,8 @@ public class AgentController : MonoBehaviour
                 poisonEatenCount++;
                 energy -= 40f;
                 LastReward -= 15f;
+
+                SpawnFloatingText(transform.position, 40, true);
 
                 if (audioSource != null && poisonEatClip != null)
                 {
@@ -728,6 +737,8 @@ public class AgentController : MonoBehaviour
         bitesReceivedCount++;
         LastReward -= 10f;
 
+        //SpawnFloatingText(transform.position, amount, true);
+
         // 1. Log attacked audio/event
         consumptionHistory.Add(new ConsumptionEvent
         {
@@ -767,6 +778,20 @@ public class AgentController : MonoBehaviour
         }
 
         if (energy <= 0f) Die();
+    }
+
+    public void SpawnFloatingText(Vector3 pos, int amount, bool isDamage)
+    {
+        if (combatTextPrefab != null)
+        {
+            Vector3 spawnPos = new Vector3(pos.x + Random.Range(-0.2f, 0.2f), pos.y + 0.8f, -0.6f);
+            GameObject popup = Instantiate(combatTextPrefab, spawnPos, Quaternion.identity);
+            FloatingCombatText fct = popup.GetComponent<FloatingCombatText>();
+            if (fct != null)
+            {
+                fct.Setup(amount, isCritical: amount >= 20, isDamage: isDamage);
+            }
+        }
     }
 
     private void Die()

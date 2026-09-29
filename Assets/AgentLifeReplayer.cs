@@ -13,6 +13,9 @@ public class AgentLifeReplayer : MonoBehaviour
     public TextMeshProUGUI txtTimestamp;
     public TextMeshProUGUI txtStepStats;
     public TextMeshProUGUI txtLegend;
+    public GameObject floatingTextPrefab; // Assign FloatingCombatTextPrefab in Inspector or Resources
+    private float lastEvaluatedEnergy = -1f;
+    private float lastEvaluatedTime = -1f;
 
     [Header("Replay Dummy/Ghost")]
     public Transform ghostAgentTransform;
@@ -56,6 +59,12 @@ public class AgentLifeReplayer : MonoBehaviour
     [Header("Peer Ghost Renderers")]
     public SpriteRenderer threatGhostRenderer;
     public SpriteRenderer preyGhostRenderer;
+
+    [Header("Multi-Agent Replay")]
+    public GameObject replayGhostPrefab; // Prefab containing ReplayAgentGhost script and renderers
+    private List<ReplayAgentGhost> activeGhosts = new List<ReplayAgentGhost>();
+    private float maxReplayDuration = 0f;
+    private float currentReplayTime = 0f;
 
     private Coroutine playbackCoroutine;
 
@@ -236,20 +245,35 @@ public class AgentLifeReplayer : MonoBehaviour
 
     public void TogglePlayPause()
     {
+        bool hasSingleHistory = activeHistory != null && activeHistory.Count > 0;
+        bool hasMultiGhosts = activeGhosts != null && activeGhosts.Count > 0;
+
+        if (!hasSingleHistory && !hasMultiGhosts) return;
+
         isPlaying = !isPlaying;
 
         if (isPlaying)
         {
             if (txtPlayPauseLabel != null) txtPlayPauseLabel.text = "PAUSE";
 
-            // If we've reached the end of the timeline, loop back to the beginning
-            if (currentFrame >= activeHistory.Count - 1)
+            // Multi-Agent Mode: Check loop boundary against maxReplayDuration
+            if (hasMultiGhosts)
             {
-                currentFrame = 0;
-                lastPlayedEventIndex = -1; // Reset sound index
+                if (currentReplayTime >= maxReplayDuration)
+                {
+                    currentReplayTime = 0f;
+                }
+            }
+            // Single-Agent Mode: Check loop boundary against activeHistory
+            else if (hasSingleHistory)
+            {
+                if (currentFrame >= activeHistory.Count - 1)
+                {
+                    currentFrame = 0;
+                    lastPlayedEventIndex = -1;
+                }
             }
 
-            // Start a single, controlled coroutine
             if (playbackCoroutine != null) StopCoroutine(playbackCoroutine);
             playbackCoroutine = StartCoroutine(PlaybackRoutine());
         }
@@ -266,19 +290,33 @@ public class AgentLifeReplayer : MonoBehaviour
 
     private IEnumerator PlaybackRoutine()
     {
-        while (isPlaying && currentFrame < activeHistory.Count - 1)
+        // 1. Multi-Agent Playback Branch
+        if (activeGhosts != null && activeGhosts.Count > 0)
         {
-            currentFrame++;
+            while (isPlaying && currentReplayTime < maxReplayDuration)
+            {
+                currentReplayTime += stepInterval;
+                if (timelineSlider != null) timelineSlider.SetValueWithoutNotify(currentReplayTime);
+                EvaluateAllGhosts(currentReplayTime);
 
-            if (timelineSlider != null) timelineSlider.SetValueWithoutNotify(currentFrame);
-            ApplySnapshot(currentFrame);
+                yield return new WaitForSeconds(stepInterval);
+            }
+        }
+        // 2. Single-Agent Playback Branch
+        else if (activeHistory != null)
+        {
+            while (isPlaying && currentFrame < activeHistory.Count - 1)
+            {
+                currentFrame++;
 
-            // Wait for the configured interval before advancing to the next snapshot
-            //yield return new WaitForSecondsRealtime(stepInterval);
-            yield return new WaitForSeconds(stepInterval);
+                if (timelineSlider != null) timelineSlider.SetValueWithoutNotify(currentFrame);
+                ApplySnapshot(currentFrame);
+
+                yield return new WaitForSeconds(stepInterval);
+            }
         }
 
-        // Replay finished
+        // Playback reached end
         isPlaying = false;
         playbackCoroutine = null;
         if (txtPlayPauseLabel != null) txtPlayPauseLabel.text = "REPLAY";
@@ -447,20 +485,31 @@ public class AgentLifeReplayer : MonoBehaviour
     private void SpawnGhostMarkers(List<ConsumptionEvent> events)
     {
         ClearGhostMarkers();
-        if (events == null) return;
+        if (events == null || events.Count == 0) return;
 
         foreach (var ev in events)
         {
+            if (ev.itemType != "Food" && ev.itemType != "Poison") continue;
+
             GameObject ghost = new GameObject($"Ghost_{ev.itemType}");
-            ghost.transform.position = new Vector3(ev.position.x, ev.position.y, 0.1f);
+            
+            // Explicit negative Z (-0.2f) so it sits in front of the arena background plane
+            ghost.transform.position = new Vector3(ev.position.x, ev.position.y, -0.2f);
 
             SpriteRenderer sr = ghost.AddComponent<SpriteRenderer>();
-            sr.sprite = (ev.itemType == "Food") ? foodSprite : poisonSprite;
             
-            // Faint, semi-transparent ghost tint
-            Color baseColor = (ev.itemType == "Food") ? new Color(0.4f, 1f, 0.4f, 0.28f) : new Color(1f, 0.3f, 0.3f, 0.28f);
-            sr.color = baseColor;
-            sr.sortingOrder = 5;
+            if (ev.itemType == "Food")
+            {
+                sr.sprite = foodSprite;
+                sr.color = new Color(0.4f, 1f, 0.4f, 0.35f); // Translucent green
+            }
+            else // Poison
+            {
+                sr.sprite = poisonSprite;
+                sr.color = new Color(1f, 0.25f, 0.25f, 0.35f); // Translucent red/pink
+            }
+
+            sr.sortingOrder = 8; // Sits above arena background (0) and below agents (25)
 
             spawnedGhostItems.Add(ghost);
         }
@@ -510,24 +559,164 @@ public class AgentLifeReplayer : MonoBehaviour
 
     public void OnScrubbed(float value)
     {
-        if (activeHistory == null || activeHistory.Count == 0) return;
-        currentFrame = Mathf.Clamp(Mathf.RoundToInt(value), 0, activeHistory.Count - 1);
-
-        // Reset sound index to the scrubbed point so earlier sounds can replay
-        float scrubTime = activeHistory[currentFrame].timeStamp;
+        // Reset sound playback pointer to scrub location
         lastPlayedEventIndex = -1;
         if (activeConsumptionHistory != null)
         {
             for (int i = 0; i < activeConsumptionHistory.Count; i++)
             {
-                if (activeConsumptionHistory[i].timeStamp < scrubTime)
+                if (activeConsumptionHistory[i].timeStamp < value)
                 {
                     lastPlayedEventIndex = i;
                 }
             }
         }
 
-        ApplySnapshot(currentFrame);
+        EvaluateAllGhosts(value);
+    }
+
+    // Steps backward by one snapshot frame, pausing playback if active.
+    public void StepBackwardOneFrame()
+    {
+        if (isPlaying) TogglePlayPause();
+        // Step back by stepInterval (e.g. 0.25s)
+        currentReplayTime = Mathf.Max(0f, currentReplayTime - stepInterval);
+        if (timelineSlider != null) timelineSlider.SetValueWithoutNotify(currentReplayTime);
+        EvaluateAllGhosts(currentReplayTime);
+    }
+
+    public void StepForwardOneFrame()
+    {
+        if (isPlaying) TogglePlayPause();
+        // Step forward by stepInterval
+        currentReplayTime = Mathf.Min(maxReplayDuration, currentReplayTime + stepInterval);
+        if (timelineSlider != null) timelineSlider.SetValueWithoutNotify(currentReplayTime);
+        EvaluateAllGhosts(currentReplayTime);
+    }
+
+    public void LoadSelectedAgents(List<AgentController> selectedAgents, List<AgentController> allAgents = null)
+    {
+        if (replayGhostPrefab == null)
+        {
+            Debug.LogError("[AgentLifeReplayer] 'Replay Ghost Prefab' is NOT assigned in the Inspector on " + gameObject.name);
+            return;
+        }
+
+        // Clean up previous ghost rigs
+        foreach (var ghost in activeGhosts)
+        {
+            if (ghost != null) Destroy(ghost.gameObject);
+        }
+        activeGhosts.Clear();
+
+        ClearGhostMarkers();
+
+        maxReplayDuration = 0f;
+        currentReplayTime = 0f;
+
+        HashSet<int> selectedIndices = new HashSet<int>();
+        List<ConsumptionEvent> combinedConsumption = new List<ConsumptionEvent>();
+
+        // 1. Instantiate Primary Ghosts (Selected agents: Full brightness + sensory rays)
+        foreach (var agent in selectedAgents)
+        {
+            if (agent == null || agent.lifeHistory == null || agent.lifeHistory.Count == 0) continue;
+
+            selectedIndices.Add(agent.agentIndex);
+
+            if (agent.consumptionHistory != null && agent.consumptionHistory.Count > 0)
+            {
+                combinedConsumption.AddRange(agent.consumptionHistory);
+            }
+
+            GameObject gObj = Instantiate(replayGhostPrefab, null);
+            ReplayAgentGhost rig = gObj.GetComponent<ReplayAgentGhost>();
+            if (rig != null)
+            {
+                rig.Initialize(agent, asBackgroundGhost: false);
+                activeGhosts.Add(rig);
+            }
+
+            float agentDuration = agent.lifeHistory[agent.lifeHistory.Count - 1].timeStamp;
+            if (agentDuration > maxReplayDuration) maxReplayDuration = agentDuration;
+        }
+
+        // 2. Instantiate Secondary Ghosts (Unselected peers: Faint bodies so interactions make visual sense)
+        if (allAgents != null)
+        {
+            foreach (var peer in allAgents)
+            {
+                if (peer == null || selectedIndices.Contains(peer.agentIndex)) continue;
+                if (peer.lifeHistory == null || peer.lifeHistory.Count == 0) continue;
+
+                GameObject peerObj = Instantiate(replayGhostPrefab, null);
+                ReplayAgentGhost peerRig = peerObj.GetComponent<ReplayAgentGhost>();
+                if (peerRig != null)
+                {
+                    peerRig.Initialize(peer, asBackgroundGhost: true);
+                    activeGhosts.Add(peerRig);
+                }
+            }
+        }
+
+        if (activeGhosts.Count == 0) return;
+
+        SpawnGhostMarkers(combinedConsumption);
+
+        if (timelineSlider != null)
+        {
+            timelineSlider.minValue = 0f;
+            timelineSlider.maxValue = maxReplayDuration;
+            timelineSlider.value = 0f;
+        }
+
+        // Sort events chronologically so the timeline scrubber plays them in exact order
+        combinedConsumption.Sort((a, b) => a.timeStamp.CompareTo(b.timeStamp));
+        activeConsumptionHistory = combinedConsumption;
+        lastPlayedEventIndex = -1;
+
+        SpawnGhostMarkers(combinedConsumption);
+
+        if (txtLegend != null) txtLegend.gameObject.SetActive(true);
+
+        isPlaying = false;
+        EvaluateAllGhosts(0f);
+    }
+
+    public void EvaluateAllGhosts(float time)
+    {
+        currentReplayTime = Mathf.Clamp(time, 0f, maxReplayDuration);
+
+        // Trigger audio playback for all consumption events passed at this timestamp
+        CheckAndPlayConsumptionAudio(currentReplayTime);
+
+        foreach (var ghost in activeGhosts)
+        {
+            if (ghost != null) ghost.EvaluateAtTime(currentReplayTime);
+        }
+
+        if (txtTimestamp != null)
+        {
+            txtTimestamp.text = $"Time: {currentReplayTime:F1}s / {maxReplayDuration:F1}s ({activeGhosts.Count} Agents)";
+        }
+    }
+
+    public void OnReplaySliderScrubbed(float targetTime)
+    {
+        // Reset combat baselines so jumping/rewinding does not spawn old damage popups
+        if (activeGhosts != null)
+        {
+            foreach (var ghost in activeGhosts)
+            {
+                if (ghost != null) ghost.ResetCombatTracker();
+            }
+        }
+
+        // Evaluate ghosts at current target time
+        foreach (var ghost in activeGhosts)
+        {
+            if (ghost != null) ghost.EvaluateAtTime(targetTime);
+        }
     }
 
     public void CloseReplay()
@@ -565,6 +754,23 @@ public class AgentLifeReplayer : MonoBehaviour
             {
                 sim.leaderboardPanel.SetActive(true);
                 sim.leaderboardPanel.transform.SetAsLastSibling();
+            }
+        }
+
+        foreach (var ghost in activeGhosts)
+        {
+            if (ghost != null) Destroy(ghost.gameObject);
+        }
+        activeGhosts.Clear();
+
+        // Bring all original agents back into view when returning to leaderboard
+        sim = Object.FindAnyObjectByType<SimulationManager>();
+        if (sim != null)
+        {
+            // Re-enable agents if needed for leaderboard background
+            foreach (var agent in Object.FindObjectsByType<AgentController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (agent != null) agent.gameObject.SetActive(true);
             }
         }
     }
