@@ -64,7 +64,7 @@ The result is an ecosystem where learning can spread through observation, teachi
 
 ## Download & Installation (Standalone Releases)
 
-Due to file size constraints, standalone release packages are distributed as split archives (`.z01`, `.z02`, ... and `.zip`). 
+Due to file size constraints, standalone release packages are distributed as split 20MB archives (`.zip.001`, `.zip.002`, ... or `.z01`, `.z02`, ...). 
 
 Ensure all archive parts for your operating system are downloaded into the **same folder** before extracting.
 
@@ -72,85 +72,50 @@ Ensure all archive parts for your operating system are downloaded into the **sam
 
 ## Linux Installation (Ubuntu, Desktop Linux & Steam Deck)
 
-1. Download all split archive parts for Linux:
-   
-   * `LifeForm-Linux.zip.001`
-   * `LifeForm-Linux..zip.002`
-   * `LifeForm-Linux.zip.003`
+1. Download all split archive parts for Linux into the same folder:
+   * `LifeForm-Linux.zip.001`, `LifeForm-Linux.zip.002`, etc. (or `LifeForm-Linux.z01`, `LifeForm-Linux.zip`)
 
-2. Open your terminal and navigate to the directory containing the downloaded files:
-   
+2. Open your terminal in that folder and extract using 7-Zip:
    ```bash
-   cd ~/Downloads
+   7z x LifeForm-Linux.zip.001 -o~/Games/LifeForm
+   ```
+   *(If distributed as standard zip volumes, recombine first: `zip -s 0 LifeForm-Linux.zip --out LifeForm-Linux-Complete.zip && unzip LifeForm-Linux-Complete.zip -d ~/Games/LifeForm`)*
+
+3. Set execution permissions and run:
+   ```bash
+   cd ~/Games/LifeForm/LifeForm-Linux
+   chmod +x LifeForm.x86_64
+   ./LifeForm.x86_64
    ```
 
-## Recombine the split files into a single archive and extract:
-
-### Combine the split files into a unified archive
-
-zip -s 0 LifeForm-Linux.zip.001 --out LifeForm-Linux-Complete.zip
-
-### Extract to your desired installation directory
-
-unzip LifeForm-Linux-Complete.zip -d ~/Games/LifeForm
-
-### Set execution permissions and run:
-
-`cd ~/Games/LifeForm/LifeForm-Linux`
-
-`chmod +x LifeForm.x86_64`
-
-`./LifeForm.x86_64`
-
-\*\*For Steam Deck and Steam Desktop users:\*\*
-
+**For Steam Deck and Steam Desktop users:**
 In Desktop Mode:
-
-        1. open the Steam Client
-    
-        2. click Games > Add a Non-Steam Game to My Library
-    
-        3. browse to ~/Games/LifeForm/LifeForm-Linux/LifeForm.x86_64, add it, and return to Gaming Mode
+1. Open the Steam Client.
+2. Click **Games** > **Add a Non-Steam Game to My Library**.
+3. Browse to `~/Games/LifeForm/LifeForm-Linux/LifeForm.x86_64`, add it, and return to Gaming Mode.
 
 ---
 
 ## Windows Installation
 
 1. Download all split archive parts for Windows into the same folder:
-   
-        LifeForm-Windows.zip.001
-       
-        LifeForm-Windows.zip.002
-       
-        LifeForm-Windows.zip.003
+   * `LifeForm-Windows.zip.001`, `LifeForm-Windows.zip.002`, etc. (or `.z01`, `.z02`, `.zip`)
 
 ### Option A: Using 7-Zip or WinRAR (Recommended)
-
-1. Right-click on the base LifeForm-Windows.zip.001 file.
-2. Select 7-Zip > Extract to "LifeForm-Windows" (or WinRAR > Extract to...).   
-   
-        7-Zip and WinRAR automatically detect and reassemble all .z01, .z02, etc., parts in sequence.
-3. Open the extracted folder and double-click LifeForm.exe to launch.
+1. Right-click `LifeForm-Windows.zip.001` (or `LifeForm-Windows.zip`).
+2. Select **7-Zip** > **Extract to "LifeForm-Windows"** (7-Zip automatically stitches all volumes together).
+3. Open the folder and double-click `LifeForm.exe`.
 
 ### Option B: Using Windows PowerShell (No third-party tools)
+If using `.z01` / `.zip` split sets without 7-Zip:
+```powershell
+# Combine the parts into a single archive
+cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
 
-1. If 7-Zip or WinRAR is not installed, open PowerShell in the download folder and merge the parts:
-   
-        ```
-        # Combine the parts into a single archive
-        cmd /c copy /b LifeForm-Windows.zip.001 + LifeForm-Windows.zip.002 + LifeForm-Windows.zip.003 LifeForm-Windows-Complete.zip
-       
-        #Extract the archive
-        Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
-       
-        # Combine the parts into a single archive
-        cmd /c copy /b LifeForm-Windows.zip.001 + LifeForm-Windows.zip.002 + LifeForm-Windows.zip.003 LifeForm-Windows-Complete.zip
-       
-        # Extract the archive
-        Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
-        ```
-
-Launch by double-clicking LifeForm.exe inside LifeForm-Windows.
+# Extract the archive
+Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
+```
+Launch by double-clicking `LifeForm.exe` inside `LifeForm-Windows`.
 
 ---
 
@@ -286,21 +251,21 @@ sequenceDiagram
 Each organism continuously performs the following loop:
 
 ```text
-Observe Environment
+Observe Environment (Within Vision Arc)
         ↓
-Build State Vector
+Build 11-D State Vector
         ↓
 Neural Network Evaluation
         ↓
-Choose Action
+Choose Action (Epsilon-Greedy)
         ↓
 Move and Interact
         ↓
-Receive Reward
+Receive Reward / Penalty
         ↓
-Store Experience
+Store Experience Transition
         ↓
-Train Network
+Sample Replay Buffer & Train Network
 ```
 
 Over time, agents develop increasingly effective survival behaviors.
@@ -310,31 +275,27 @@ Over time, agents develop increasingly effective survival behaviors.
 # Neural Network
 
 Each agent contains two neural networks:
-
 - Policy Network
 - Target Network
 
 Architecture:
-
 ```text
 Input Layer      11
       ↓
 Hidden Layer     32 (ReLU)
       ↓
-Output Layer      4 (Q-values)
+Output Layer      4 (Linear Q-values)
 ```
 
-Inputs include:
-
-- Agent position
-- Direction to nearest food
-- Direction to nearest poison
-- Direction to strongest nearby threat
-- Direction to weakest nearby prey
+Inputs:
+- Agent normalized position ($X, Y$)
+- Direction to nearest food ($X, Y$)
+- Direction to nearest poison ($X, Y$)
+- Direction to nearest threat ($X, Y$)
+- Direction to nearest prey ($X, Y$)
 - Current health ratio
 
 Outputs:
-
 ```text
 0 = Move Up
 1 = Move Down
@@ -351,7 +312,6 @@ Action selection uses epsilon-greedy exploration.
 Agents maintain an experience replay buffer.
 
 Each experience contains:
-
 ```text
 State
 Action
@@ -362,7 +322,6 @@ Observation Flag
 ```
 
 Experiences originate from:
-
 1. Personal experience
 2. Observed peer behavior
 3. Human demonstrations
@@ -375,8 +334,7 @@ The replay buffer uses a circular overwrite strategy to maintain a fixed memory 
 
 LifeForm supports observational learning.
 
-When a nearby organism successfully performs an action, neighboring agents can record:
-
+When a nearby organism successfully performs an action, neighboring agents within visual range record:
 ```text
 Observed State
 Observed Action
@@ -393,8 +351,7 @@ This allows useful strategies to spread throughout the ecosystem.
 Players can directly possess an organism and control its movement.
 
 While possessed:
-
-- AI control is suspended
+- Autonomous AI control is suspended
 - Player behavior is recorded
 - Nearby organisms observe player actions
 - Demonstrated strategies become learning examples
@@ -406,315 +363,123 @@ Players effectively act as teachers within the ecosystem.
 # Survival Mechanics
 
 ## Energy
-
-Energy is the primary survival resource.
-
-Agents continuously lose energy over time.
-
-```text
-Movement Cost
-+
-Existence Cost
-=
-Energy Drain
-```
-
-If energy reaches zero:
-
-```text
-Agent Dies
-```
-
----
+Energy is the primary survival resource. Agents continuously lose energy over time to sustain movement and existence. If energy reaches zero, the agent dies, frees its colliders, and renders as a corpse.
 
 ## Food
-
 Benefits:
-
 ```text
 +30 Energy
 +10 Reward
 ```
-
-Food respawns after being consumed.
-
----
+Food respawns dynamically based on setup toggle options.
 
 ## Poison
-
 Risks:
-
 ```text
 -40 Energy
 -15 Reward
 ```
-
-Agents may occasionally resist poison effects.
-
-Successful resistance is tracked independently.
+Agents may occasionally resist poison damage based on the configured lethal chance slider. Successful resistance is tracked independently on the leaderboard.
 
 ---
 
 # Predation System
 
-Agents compare their energy levels against nearby organisms.
-
-When a stronger organism encounters a weaker one:
-
-```text
-Energy Siphon
-```
-
-occurs.
-
-Benefits include:
-
-- Energy gain
-- Positive reinforcement reward
-- Increased survival probability
-
-Consequences for victims include:
-
-- Energy loss
-- Negative reinforcement
-- Potential death
-
-This naturally creates predator/prey relationships.
+Agents compare energy levels with peers within visual range. When a stronger organism collides with a weaker peer, an energy siphon occurs:
+- The predator drains up to 15 energy and receives positive reinforcement.
+- The victim loses energy, receives negative reinforcement, and gains an escape impulse.
+- The interaction triggers sword clash audio and floating combat text popups.
 
 ---
 
 # Behavioral Profiling
 
-When an agent dies, its behavior can be classified based on lifetime performance.
+When an agent dies, its behavior is classified based on lifetime performance and neural network probing:
 
-Possible archetypes include:
-
-```text
-Forager
-Apex Hunter
-Survivalist
-Explorer
-Erratic Wanderer
-```
-
-These profiles are derived from:
-
-- Food consumption
-- Poison avoidance
-- Combat activity
-- Exploration tendencies
-- Learned neural-network preferences
+- **Apex Predator**: Actively pursues and siphons energy from peers.
+- **Forager**: Prioritizes food routes and low-risk resource gathering.
+- **Cautious Survivor**: Develops high poison resistance and learned negative Q-value weights for hazards.
+- **Nomadic Pacifist**: Achieves high survival longevity with minimal combat encounters.
+- **Erratic Explorer / Indecisive Wanderer**: Broad arena traversal with evolving or balanced policy weights.
 
 ---
 
 # Emergent Behaviors
 
-LifeForm is designed to encourage the emergence of:
+LifeForm encourages the emergence of:
+- Efficient foraging paths
+- Poison avoidance and hazard evasion
+- Predator/prey pack dynamics
+- Social learning through imitation
+- Human-influenced behavioral adoption
+- Resource competition and territory dominance
 
-- Efficient foraging
-- Poison avoidance
-- Predator/prey strategies
-- Risk assessment
-- Social learning
-- Human-influenced adaptation
-- Resource competition
-- Opportunistic hunting
-
-No specific survival strategy is explicitly programmed.
+No specific survival strategy is hardcoded.
 
 ---
 
-### Possessed Agent
+# Controls
 
-When an organism is possessed:
-
-- Manual control overrides AI
-- Training data is generated from player actions
-- Other organisms can learn from demonstrations
+### Movement / Possession
+* **Mouse Left Click**: Possess clicked agent / Deselect
+* **Tab / Gamepad North (Y / Triangle)**: Cycle through living agents
+* **W, A, S, D / Arrow Keys**: Move possessed agent
+* **Gamepad Left Stick / D-Pad**: Move possessed agent
+* **Escape**: Stop simulation and display Leaderboard
 
 ---
 
-# Installation
+# Development & Source Installation
 
 ## Prerequisites
 
-### Unity
-
-Install:
-
-- Unity Hub
-- Compatible Unity Editor version
-
-The required Unity version can be found in:
-
+### Unity Editor
+Install Unity Hub and the compatible Unity Editor version specified in:
 ```text
 ProjectSettings/ProjectVersion.txt
 ```
-
-Download Unity Hub:
-
-https://unity.com/download
+Download Unity Hub: https://unity.com/download
 
 ---
 
 ## Clone Repository
 
 ```bash
-git clone https://github.com/bryanspms/LifeForm.git
+git clone [https://github.com/bryanspms/LifeForm.git](https://github.com/bryanspms/LifeForm.git)
 cd LifeForm
 ```
 
-Alternatively download the repository ZIP directly from GitHub.
+---
+
+## Open Project in Unity
+
+1. Launch **Unity Hub**.
+2. Click **Add Project** and select the cloned `LifeForm` folder.
+3. Allow Unity to import assets and compile scripts.
+4. Open `Assets/LifeFormScene.unity` and click **Play** to run.
+
+The repository excludes generated folders (`Library/`, `Temp/`, `Logs/`, `Build/`, `obj/`, and `/.plastic/`), which Unity regenerates automatically.
 
 ---
 
-## Open Project
+## Building Binaries
 
-1. Launch Unity Hub.
-2. Click **Add Project**.
-3. Select the cloned `LifeForm` folder.
-4. Allow Unity to import assets and rebuild cache files.
-
-The first launch may take several minutes.
-
----
-
-## Generated Folders
-
-The repository intentionally excludes:
-
-```text
-Library/
-Temp/
-Logs/
-Obj/
-Build/
-Builds/
-```
-
-These are automatically regenerated by Unity.
-
----
-
-## Running the Simulation
-
-Open:
-
-```text
-Assets/LifeFormScene.unity
-```
-
-Press:
-
-```text
-Play
-```
-
-Expected behavior:
-
-- Agents spawn
-- Resources populate
-- Learning begins
-- Evolutionary interactions emerge
-
----
-
-## Documentation
-
-- **[Operational Guide](LifeForm-Operational-Guide.md)**: High-level architectural overview, arena controls, human demonstration steps, and replay analysis.
-
----
-
-## Controls
-
-### Keyboard
-
-```text
-W A S D
-```
-
-or
-
-```text
-Arrow Keys
-```
-
-### Gamepad
-
-```text
-Left Stick
-D-Pad
-```
-
----
-
-## Building
-
-Open:
-
-```text
-File → Build Profiles
-```
-
-Select:
-
-```text
-Windows
-```
-
-or
-
-```text
-Linux
-```
-
-Then click:
-
-```text
-Build
-```
+1. Go to **File** > **Build Profiles**.
+2. Select **Windows** or **Linux**.
+3. Click **Build** and choose your output directory.
 
 ---
 
 ## Troubleshooting
 
 ### Long Initial Load Times
-
-On first load Unity must:
-
-- Import assets
-- Compile scripts
-- Rebuild cache files
-
-This can take several minutes.
+On first load, Unity imports textures, compiles C# scripts, and rebuilds package caches. This can take several minutes.
 
 ### Missing Packages
+Open **Window** > **Package Manager**, select **Packages: In Project**, and ensure all required dependencies are installed.
 
-Open:
-
-```text
-Window → Package Manager
-```
-
-and allow Unity to restore any missing dependencies.
-
-### Build Errors
-
-Try:
-
-```text
-Assets → Reimport All
-```
-
-If issues persist:
-
-```bash
-rm -rf Library
-```
-
-and reopen the project.
-
-Unity will regenerate the folder automatically.
+### Cache Stalls or Compiler Glitches
+Try **Assets** > **Reimport All**. If issues persist, close Unity, remove the generated library cache via `rm -rf Library`, and relaunch.
 
 ---
 
@@ -722,19 +487,17 @@ Unity will regenerate the folder automatically.
 
 ```text
 Assets/
-├── AgentController.cs
-├── NeuralNetwork.cs
-├── ReplayBuffer.cs
-├── FloatingText.cs
-├── NumberStepper.cs
-├── AgentPrefab.prefab
-├── FoodPrefab.prefab
-├── PoisonPrefab.prefab
-├── LifeFormScene.unity
-└── Resources/
-
-Packages/
-ProjectSettings/
+├── AgentController.cs        # Agent mechanics, DQN logic, and live sensory rays
+├── AgentLifeReplayer.cs      # Timeline scrubber and replay controller
+├── FloatingCombatText.cs     # World-space combat damage text popups
+├── NeuralNetwork.cs          # Multi-layer perceptron (Forward & Backprop)
+├── ReplayAgentGhost.cs       # Replay ghost visual rig and sensory cone rendering
+├── ReplayBuffer.cs           # Circular experience buffer
+├── SimulationManager.cs      # Arena coordinator, setup panel, HUD, and leaderboard
+├── SpawnItem.cs              # Food and poison respawn handlers
+├── Audio/                    # Siphon clashes, eat SFX, and replay music
+├── LifeFormScene.unity       # Primary arena scene
+└── Resources/                # Prefabs and UI materials
 ```
 
 ---
@@ -742,18 +505,11 @@ ProjectSettings/
 # Future Development
 
 Potential future areas of exploration include:
-
-- Genetic evolution
-- Reproduction
-- Multi-generational inheritance
-- Improved sensory systems
-- Resource specialization
-- Group behavior
-- Flocking and schooling
-- Pack hunting
-- Advanced reinforcement learning algorithms
-- Persistent ecosystems
-- Long-term analytics and reporting
+- Genetic evolution and reproduction
+- Multi-generational policy inheritance
+- Flocking, schooling, and pack hunting
+- Advanced multi-agent reinforcement learning algorithms
+- Persistent ecosystems and exportable analytics
 
 ---
 
@@ -761,21 +517,9 @@ Potential future areas of exploration include:
 
 LifeForm is licensed under the MIT License.
 
-You are free to:
+You are free to use, modify, distribute, and incorporate portions of the project for both commercial and non-commercial purposes, provided proper attribution is maintained and the original copyright notice is preserved.
 
-- Use the source code
-- Modify the source code
-- Distribute copies
-- Incorporate portions of the project into your own work
-- Use the software for commercial or non-commercial purposes
-
-Provided that:
-
-- Proper attribution is maintained
-- The original copyright notice is preserved
-- A copy of the MIT License is included with distributions
-
-See the LICENSE file for full details.
+See `LICENSE.txt` for details.
 
 Copyright (c) 2026 Bryan Price
 
@@ -783,12 +527,5 @@ Copyright (c) 2026 Bryan Price
 
 ## Attribution
 
-If you build upon LifeForm, attribution is appreciated.
-
-Suggested attribution:
-
+If you build upon LifeForm, attribution is appreciated:
 "Based on LifeForm (github.com/bryanspms/LifeForm) by Bryan Price"
-
----
-
----
