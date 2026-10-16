@@ -74,9 +74,9 @@ Ensure all archive parts for your operating system are downloaded into the **sam
 
 1. Download all split archive parts for Linux:
    
-   * `LifeForm-Linux.z01`
-   * `LifeForm-Linux.z02` (and any subsequent `.z0x` parts)
-   * `LifeForm-Linux.zip`
+   * `LifeForm-Linux.zip.001`
+   * `LifeForm-Linux..zip.002`
+   * `LifeForm-Linux.zip.003`
 
 2. Open your terminal and navigate to the directory containing the downloaded files:
    
@@ -88,7 +88,7 @@ Ensure all archive parts for your operating system are downloaded into the **sam
 
 ### Combine the split files into a unified archive
 
-zip -s 0 LifeForm-Linux.zip --out LifeForm-Linux-Complete.zip
+zip -s 0 LifeForm-Linux.zip.001 --out LifeForm-Linux-Complete.zip
 
 ### Extract to your desired installation directory
 
@@ -118,15 +118,15 @@ In Desktop Mode:
 
 1. Download all split archive parts for Windows into the same folder:
    
-        LifeForm-Windows.z01
+        LifeForm-Windows.zip.001
        
-        LifeForm-Windows.z02 (and any subsequent .z0x parts)
+        LifeForm-Windows.zip.002
        
-        LifeForm-Windows.zip
+        LifeForm-Windows.zip.003
 
 ### Option A: Using 7-Zip or WinRAR (Recommended)
 
-1. Right-click on the base LifeForm-Windows.zip file.
+1. Right-click on the base LifeForm-Windows.zip.001 file.
 2. Select 7-Zip > Extract to "LifeForm-Windows" (or WinRAR > Extract to...).   
    
         7-Zip and WinRAR automatically detect and reassemble all .z01, .z02, etc., parts in sequence.
@@ -138,13 +138,13 @@ In Desktop Mode:
    
         ```
         # Combine the parts into a single archive
-        cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
+        cmd /c copy /b LifeForm-Windows.zip.001 + LifeForm-Windows.zip.002 + LifeForm-Windows.zip.003 LifeForm-Windows-Complete.zip
        
         #Extract the archive
         Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
        
         # Combine the parts into a single archive
-        cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
+        cmd /c copy /b LifeForm-Windows.zip.001 + LifeForm-Windows.zip.002 + LifeForm-Windows.zip.003 LifeForm-Windows-Complete.zip
        
         # Extract the archive
         Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
