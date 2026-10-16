@@ -20,3 +20,4 @@ Recordings/
 *.opendb
 *.VC.db
 UnityPlayer.so
+/.plastic/
