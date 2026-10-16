@@ -2,27 +2,31 @@ using UnityEngine;
 
 public class SpawnItem : MonoBehaviour
 {
-    public static bool AllowRespawn = true;
+    // Independent respawn toggles
+    public static bool AllowFoodRespawn = true;
+    public static bool AllowPoisonRespawn = true;
 
-    // Make this public so SimulationManager can assign it directly if needed
-    public Vector2 bounds = new Vector2(25f, 15f);
-
-    public void SetBounds(Vector2 newBounds)
-    {
-        bounds = newBounds;
-    }
+    public Vector2 bounds;
 
     public void Respawn()
     {
-        if (AllowRespawn)
-        {
-            float x = Random.Range(-bounds.x + 1f, bounds.x - 1f);
-            float y = Random.Range(-bounds.y + 1f, bounds.y - 1f);
-            transform.position = new Vector3(x, y, 0f);
-        }
-        else
+        // Check tag to determine whether this item is permitted to respawn
+        if (CompareTag("Food") && !AllowFoodRespawn)
         {
             Destroy(gameObject);
+            return;
         }
+
+        if (CompareTag("Poison") && !AllowPoisonRespawn)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // Standard respawn positioning
+        transform.position = new Vector2(
+            Random.Range(-bounds.x, bounds.x),
+            Random.Range(-bounds.y, bounds.y)
+        );
     }
 }

@@ -19,6 +19,7 @@ public struct AgentRecord
     // Player / Possession Tracking
     public bool wasEverPossessed;
     public int playerObservationsLogged;   // Total experiences copied from the player
+    public int peerObservationsLogged;     // Total experiences observed
     public float playerInfluencePercent;   // Percentage of buffer influenced by player
     
     // Cognitive / Training summaries
@@ -29,8 +30,39 @@ public struct AgentRecord
     public float poisonAvoidance;   // Q-value penalty when sensing poison
 }
 
+[System.Serializable]
+public struct AgentSnapshot
+{
+    public float timeStamp;
+    public Vector2 position;
+    public float rotationAngle;
+    public float energy;
+    public int actionTaken;
+    public float reward;
+    public float[] sensorState;
+
+    // --- PEER GHOST VISUALIZATION ---
+    public bool hasThreatVisible;
+    public Vector2 threatWorldPos;
+    public bool hasPreyVisible;
+    public Vector2 preyWorldPos;
+}
+
+[System.Serializable]
+public struct ConsumptionEvent
+{
+    public float timeStamp;
+    public Vector2 position;
+    public string itemType; // "Food" or "Poison"
+}
+
 public class AgentController : MonoBehaviour
 {
+    private Vector2 lastNearestThreatPos;
+    private bool lastHasThreat;
+    private Vector2 lastNearestPreyPos;
+    private bool lastHasPrey;
+
     [Header("Manual Possession")]
     public bool isPossessed = false;
     public float manualMoveSpeed = 5f;
@@ -60,7 +92,7 @@ public class AgentController : MonoBehaviour
     public float energy = 100f;
     public bool isAlive = true;
     public float visionRadius = 5f;
-    [Range(10f, 360f)] public float visionAngle = 120f; // <-- Vision cone spread in degrees
+    [Range(15f, 120f)] public float visionAngle = 90f; // <-- Vision cone spread in degrees
 
     [Range(0f, 1f)] public float imitationWeight = 0.7f;
     public float lifetime = 0f;
@@ -94,6 +126,8 @@ public class AgentController : MonoBehaviour
     [HideInInspector] public NeuralNetwork policyNet;
     [HideInInspector] public NeuralNetwork targetNet;
     [HideInInspector] public ReplayBuffer memory;
+    [HideInInspector] public List<AgentSnapshot> lifeHistory = new List<AgentSnapshot>(1000);
+    [HideInInspector] public List<ConsumptionEvent> consumptionHistory = new List<ConsumptionEvent>();
 
     private Rigidbody2D rb;
     private Vector2[] actions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
@@ -119,12 +153,30 @@ public class AgentController : MonoBehaviour
 
     private LineRenderer visionRing;
 
-    [Header("Player Tracking")]
+    [Header("Player & Peer Tracking")]
     public bool hasBeenPossessed = false;
     public int playerMemoriesImprinted = 0;
+    public int peerMemoriesImprinted = 0; // Tracks observations of other AI agents
 
     [Header("Visuals & Death")]
     public Sprite deadSprite; // Assign the death slice from your sprite sheet in the Inspector
+    [HideInInspector] public Sprite aliveSprite; // Cache the live appearance
+
+    // Distance-based reward shaping
+    private float previousFoodDistance = -1f;
+    private float currentFoodDistance = -1f;
+    private float previousPoisonDistance = -1f;
+    private float currentPoisonDistance = -1f;
+
+    [Header("VFX")]
+    public GameObject combatTextPrefab;
+
+    [Header("Live Sensor Rays")]
+    public bool showLiveSensors = true;
+    private LineRenderer liveFoodLine;
+    private LineRenderer livePoisonLine;
+    private LineRenderer livePreyLine;
+    private LineRenderer liveThreatLine;
 
     void Awake()
     {
@@ -135,6 +187,7 @@ public class AgentController : MonoBehaviour
         if (sr != null)
         {
             defaultColor = sr.color;
+            aliveSprite = sr.sprite; // Capture the living sprite on spawn
         }
 
         policyNet = new NeuralNetwork(11, 32, 4);
@@ -173,6 +226,56 @@ public class AgentController : MonoBehaviour
 
         SetupOverheadText();
         SetupVisionRing(); // <-- Initialize the vision circle
+        SetupLiveSensorRays();
+    }
+
+    public void UpdateVisionAngle(float newAngle)
+    {
+        visionAngle = newAngle;
+        DrawVisionArc(24);
+    }
+
+    private void SetupLiveSensorRays()
+    {
+        liveFoodLine = CreateLiveRay("LiveFoodRay", new Color(0.2f, 1f, 0.2f, 0.8f));
+        livePoisonLine = CreateLiveRay("LivePoisonRay", new Color(1f, 0.2f, 0.2f, 0.8f));
+        livePreyLine = CreateLiveRay("LivePreyRay", new Color(1f, 0.75f, 0f, 0.85f));
+        liveThreatLine = CreateLiveRay("LiveThreatRay", new Color(0.9f, 0.1f, 0.9f, 0.85f));
+    }
+
+    private LineRenderer CreateLiveRay(string name, Color color)
+    {
+        GameObject obj = new GameObject(name);
+        obj.transform.SetParent(transform);
+        LineRenderer lr = obj.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.startWidth = 0.04f;
+        lr.endWidth = 0.02f;
+        lr.sortingOrder = 5;
+        lr.material = new Material(Shader.Find("Sprites/Default"));
+        lr.startColor = color;
+        lr.endColor = new Color(color.r, color.g, color.b, 0.1f);
+        lr.enabled = false;
+        return lr;
+    }
+
+    private Texture2D CreateDashTexture()
+    {
+        int width = 16;
+        Texture2D tex = new Texture2D(width, 1, TextureFormat.RGBA32, false);
+        tex.wrapMode = TextureWrapMode.Repeat;
+        tex.filterMode = FilterMode.Point;
+
+        Color[] pixels = new Color[width];
+        for (int i = 0; i < width; i++)
+        {
+            // First half solid white, second half transparent
+            pixels[i] = (i < width / 2) ? Color.white : Color.clear;
+        }
+
+        tex.SetPixels(pixels);
+        tex.Apply();
+        return tex;
     }
 
     void Update()
@@ -181,6 +284,36 @@ public class AgentController : MonoBehaviour
         {
             lifetime += Time.deltaTime;
             UpdateHUD();
+            UpdateLiveSensoryRays();
+        }
+    }
+
+    private void UpdateLiveSensoryRays()
+    {
+        if (!showLiveSensors || LastState == null || LastState.Length < 10) return;
+
+        Vector3 origin = new Vector3(transform.position.x, transform.position.y, -0.5f);
+        Vector3 foodDir = new Vector3(LastState[2], LastState[3], 0f);
+        Vector3 poisonDir = new Vector3(LastState[4], LastState[5], 0f);
+        Vector3 threatDir = new Vector3(LastState[6], LastState[7], 0f);
+        Vector3 preyDir = new Vector3(LastState[8], LastState[9], 0f);
+
+        UpdateRayComponent(liveFoodLine, origin, foodDir);
+        UpdateRayComponent(livePoisonLine, origin, poisonDir);
+        UpdateRayComponent(liveThreatLine, origin, threatDir);
+        UpdateRayComponent(livePreyLine, origin, preyDir);
+    }
+
+    private void UpdateRayComponent(LineRenderer lr, Vector3 origin, Vector3 dir)
+    {
+        if (lr == null) return;
+        bool active = dir.sqrMagnitude > 0.01f;
+        lr.enabled = active;
+        if (active)
+        {
+            lr.positionCount = 2;
+            lr.SetPosition(0, origin);
+            lr.SetPosition(1, origin + dir.normalized * visionRadius);
         }
     }
 
@@ -275,7 +408,6 @@ public class AgentController : MonoBehaviour
         float normX = (transform.position.x / arenaBounds.x) * 2f - 1f;
         float normY = (transform.position.y / arenaBounds.y) * 2f - 1f;
 
-        // Mask out layer 2 ("Ignore Raycast") where corpses reside
         int mask = ~(1 << 2);
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, visionRadius, mask);
 
@@ -289,33 +421,67 @@ public class AgentController : MonoBehaviour
         float minTDist = float.MaxValue;
         float minPreyDist = float.MaxValue;
 
+        lastHasThreat = false;
+        lastHasPrey = false;
+
+        lastNearestThreatPos = Vector2.zero;
+        lastNearestPreyPos = Vector2.zero;
+
         foreach (var hit in hits)
         {
-            if (hit.gameObject == gameObject) continue;
+            if (hit.gameObject == gameObject)
+                continue;
 
-            AgentController peer = hit.GetComponent<AgentController>();
+            // Direction the agent is facing
+            Vector2 forward = transform.right;
+            // Direction to detected object
+            Vector2 dirToTarget = ((Vector2)hit.transform.position -(Vector2)transform.position).normalized;
+
+            // Ignore anything outside vision cone
+            float angleToTarget = Vector2.Angle(forward, dirToTarget);
+            if (angleToTarget > visionAngle * 0.5f)
+                continue;
+
+            Debug.DrawLine(
+                transform.position,
+                hit.transform.position,
+                Color.red,
+                0.05f);
+
+            //Debug.Log(
+            //    $"Agent {agentIndex} sees {hit.name} angle={angleToTarget}");
+
+            //
+            // Look for AgentController on the hit object OR any of its parents
+            AgentController peer = hit.GetComponentInParent<AgentController>();
+
             if (peer != null)
             {
-                if (peer.isAlive && peer.energy > 0f)
-                {
-                    float pDist = Vector2.Distance(transform.position, peer.transform.position);
-                    Vector2 dirToPeer = ((Vector2)peer.transform.position - (Vector2)transform.position).normalized;
+                // If the detected agent is dead or the same agent, completely ignore it
+                if (!peer.isAlive || peer.energy <= 0f)
+                    continue;
 
-                    if (peer.energy > this.energy)
+                float pDist = Vector2.Distance(transform.position, peer.transform.position);
+                Vector2 dirToPeer = ((Vector2)peer.transform.position - (Vector2)transform.position).normalized;
+
+                if (peer.energy >= this.energy)
+                {
+                    if (pDist < minTDist)
                     {
-                        if (pDist < minTDist)
-                        {
-                            minTDist = pDist;
-                            nearestThreatDir = dirToPeer;
-                        }
+                        minTDist = pDist;
+                        nearestThreatDir = dirToPeer;
+                        lastNearestThreatPos = peer.transform.position;
+                        lastHasThreat = true;
                     }
-                    else if (peer.energy < this.energy)
+                }
+                else
+                {
+                    if (pDist < minPreyDist)
                     {
-                        if (pDist < minPreyDist)
-                        {
-                            minPreyDist = pDist;
-                            nearestPreyDir = dirToPeer;
-                        }
+                        minPreyDist = pDist;
+                        nearestPreyDir = dirToPeer;
+                        lastNearestPreyPos = peer.transform.position;
+                        lastHasPrey = true;
                     }
                 }
                 continue;
@@ -334,6 +500,16 @@ public class AgentController : MonoBehaviour
                 nearestPoisonDir = ((Vector2)hit.transform.position - (Vector2)transform.position).normalized;
             }
         }
+
+        Debug.Log(
+            $"RETURNING " +
+            $"Threat={lastHasThreat} " +
+            $"ThreatDir=({nearestThreatDir.x:F2},{nearestThreatDir.y:F2}) " +
+            $"Prey={lastHasPrey} " +
+            $"PreyDir=({nearestPreyDir.x:F2},{nearestPreyDir.y:F2})");
+
+        currentFoodDistance = (minFDist < float.MaxValue) ? minFDist : -1f;
+        currentPoisonDistance = (minPDist < float.MaxValue) ? minPDist : -1f;
 
         float healthRatio = Mathf.Clamp01(energy / 100f);
 
@@ -384,9 +560,55 @@ public class AgentController : MonoBehaviour
             energy -= 0.04f;
             if (energy <= 0f) Die();
 
-            float cx = Mathf.Clamp(transform.position.x, -arenaBounds.x, arenaBounds.x);
-            float cy = Mathf.Clamp(transform.position.y, -arenaBounds.y, arenaBounds.y);
-            transform.position = new Vector3(cx, cy, transform.position.z);
+            // Wrap boundaries for possessed player
+            Vector3 pos = transform.position;
+            if (pos.x > arenaBounds.x) pos.x = -arenaBounds.x;
+            else if (pos.x < -arenaBounds.x) pos.x = arenaBounds.x;
+
+            if (pos.y > arenaBounds.y) pos.y = -arenaBounds.y;
+            else if (pos.y < -arenaBounds.y) pos.y = arenaBounds.y;
+
+            transform.position = pos;
+            if (rb != null) rb.position = pos;
+
+            // --- RECORD POSSESSED TRAJECTORY ---
+            // Record every few ticks so the replay traces human control smoothly
+            float sensorRotation = transform.eulerAngles.z;
+            if (decisionCooldown <= 0)
+            {                
+                Debug.Log(
+                    $"SENSE ROT={sensorRotation:F1} " +
+                    $"SAVE ROT={transform.eulerAngles.z:F1}");
+
+                Debug.Log($"STATE ROT={transform.eulerAngles.z}");
+
+                Debug.Log(
+                    $"Saved Rotation={transform.eulerAngles.z:F1}");
+
+
+                LastState = GetSensorState(arenaBounds);
+                lifeHistory.Add(new AgentSnapshot
+                {
+                    timeStamp = lifetime,
+                    position = transform.position,
+                    rotationAngle = transform.eulerAngles.z,
+                    energy = energy,
+                    actionTaken = -1, // Indicates manual human control
+                    reward = 0f,
+                    sensorState = (float[])LastState.Clone(),
+                    hasThreatVisible = lastHasThreat,
+                    threatWorldPos = lastNearestThreatPos,
+                    hasPreyVisible = lastHasPrey,
+                    preyWorldPos = lastNearestPreyPos
+                });
+
+                decisionCooldown = DECISION_INTERVAL;
+            }
+            else
+            {
+                decisionCooldown--;
+            }
+
             return;
         }
 
@@ -395,62 +617,14 @@ public class AgentController : MonoBehaviour
 
         if (decisionCooldown <= 0)
         {
-            LastState = GetSensorState(arenaBounds);
+            //LastState = GetSensorState(arenaBounds);
             LastAction = SelectAction(LastState);
+            LastReward = 0f; // Reset per decision frame so rewards accurately reflect immediate transitions
             decisionCooldown = dynamicInterval;
         }
         else
         {
             decisionCooldown--;
-        }
-
-        // --- WALL BOUNCE / REDIRECTION LOGIC ---
-        // actions: 0 = Up (0, 1), 1 = Down (0, -1), 2 = Left (-1, 0), 3 = Right (1, 0)
-        bool hitWall = false;
-
-        // Check if trying to move past the horizontal boundaries
-        if (transform.position.x >= arenaBounds.x && LastAction == 3) // Moving Right into Right wall
-        {
-            hitWall = true;
-        }
-        else if (transform.position.x <= -arenaBounds.x && LastAction == 2) // Moving Left into Left wall
-        {
-            hitWall = true;
-        }
-        // Check if trying to move past the vertical boundaries
-        else if (transform.position.y >= arenaBounds.y && LastAction == 0) // Moving Up into Top wall
-        {
-            hitWall = true;
-        }
-        else if (transform.position.y <= -arenaBounds.y && LastAction == 1) // Moving Down into Bottom wall
-        {
-            hitWall = true;
-        }
-
-        if (hitWall)
-        {
-            // Pick a random alternative action that does not push into the same wall
-            List<int> openActions = new List<int>();
-
-            if (transform.position.y < arenaBounds.y) openActions.Add(0); // Up is available
-            if (transform.position.y > -arenaBounds.y) openActions.Add(1); // Down is available
-            if (transform.position.x > -arenaBounds.x) openActions.Add(2); // Left is available
-            if (transform.position.x < arenaBounds.x) openActions.Add(3); // Right is available
-
-            if (openActions.Count > 0)
-            {
-                LastAction = openActions[Random.Range(0, openActions.Count)];
-            }
-            else
-            {
-                LastAction = Random.Range(0, 4);
-            }
-
-            // Give the new heading time to clear the wall
-            decisionCooldown = dynamicInterval;
-
-            // Small negative reward so the neural net learns walls are dead ends
-            LastReward -= 0.05f;
         }
 
         float dynamicSpeed = moveSpeed * (1f + desperation * 0.75f);
@@ -464,15 +638,64 @@ public class AgentController : MonoBehaviour
         {
             float angle = Mathf.Atan2(targetVelocity.y, targetVelocity.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, 0, angle);
+            // Testing...
+            LastState = GetSensorState(arenaBounds);
+            // /////////////////////////////////////
         }
 
-        // Clamp to prevent escaping the camera frame
-        float clampedX = Mathf.Clamp(transform.position.x, -arenaBounds.x, arenaBounds.x);
-        float clampedY = Mathf.Clamp(transform.position.y, -arenaBounds.y, arenaBounds.y);
-        transform.position = new Vector3(clampedX, clampedY, transform.position.z);
+        // Wrap around screen boundaries
+        Vector3 wrapPos = transform.position;
+        if (wrapPos.x > arenaBounds.x) wrapPos.x = -arenaBounds.x;
+        else if (wrapPos.x < -arenaBounds.x) wrapPos.x = arenaBounds.x;
+
+        if (wrapPos.y > arenaBounds.y) wrapPos.y = -arenaBounds.y;
+        else if (wrapPos.y < -arenaBounds.y) wrapPos.y = arenaBounds.y;
+
+        transform.position = wrapPos;
+        rb.position = wrapPos; // removes a visual flicker when an agent crosses screen boundariaes.
 
         energy -= 0.04f;
         LastReward -= 0.005f;
+
+        // Give a tiny positive reward if the agent reduces its distance to the nearest visible food item.
+        // This gives the agent a "scent trail" so it doesn't need to bump into food purely by luck before learning begins.
+        // The same is true for poison so it can try to avoid it.
+        // --- REWARD SHAPING: APPROACHING / RETREATING ---
+        // 1. Food Attraction
+        if (currentFoodDistance > 0f && previousFoodDistance > 0f)
+        {
+            float distanceDelta = previousFoodDistance - currentFoodDistance;
+            LastReward += distanceDelta * 0.05f;
+        }
+        previousFoodDistance = currentFoodDistance;
+
+        // 2. Poison Repulsion (penalty for stepping closer, reward for steering away)
+        if (currentPoisonDistance > 0f && previousPoisonDistance > 0f)
+        {
+            float poisonDelta = previousPoisonDistance - currentPoisonDistance;
+            // Negative if moving closer, positive if moving away
+            LastReward -= poisonDelta * 0.08f;
+        }
+        previousPoisonDistance = currentPoisonDistance;
+
+        // --- RECORD SNAPSHOT HERE (Captures live shaped reward and collisions) ---
+        if (decisionCooldown == dynamicInterval)
+        {
+            lifeHistory.Add(new AgentSnapshot
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                rotationAngle = transform.eulerAngles.z,
+                energy = energy,
+                actionTaken = LastAction,
+                reward = LastReward,
+                sensorState = (float[])LastState.Clone(),
+                hasThreatVisible = lastHasThreat,
+                threatWorldPos = lastNearestThreatPos,
+                hasPreyVisible = lastHasPrey,
+                preyWorldPos = lastNearestPreyPos
+            });
+        }
 
         if (energy <= 0f) Die();
     }
@@ -494,10 +717,14 @@ public class AgentController : MonoBehaviour
             float discountedReward = peer.LastReward * imitationWeight;
             float[] peerNextState = peer.GetSensorState(arenaBounds);
 
-            // Track when this agent imprints an observation of the player
+            // Track whether this came from the player or a regular peer
             if (peer.isPossessed)
             {
                 playerMemoriesImprinted++;
+            }
+            else
+            {
+                peerMemoriesImprinted++;
             }
 
             memory.Push(peer.LastState, peer.LastAction, discountedReward, peerNextState, !peer.isAlive, true);
@@ -542,6 +769,16 @@ public class AgentController : MonoBehaviour
             LastReward += 10f;
             foodEatenCount++;
 
+            SpawnFloatingText(transform.position, 30, false);
+
+            // --- RECORD FOOD CONSUMPTION GHOST ---
+            consumptionHistory.Add(new ConsumptionEvent
+            {
+                timeStamp = lifetime,
+                position = other.transform.position,
+                itemType = "Food"
+            });
+
             if (audioSource != null && foodEatClip != null)
             {
                 audioSource.PlayOneShot(foodEatClip, soundVolume);
@@ -551,31 +788,52 @@ public class AgentController : MonoBehaviour
         }
         else if (other.CompareTag("Poison"))
         {
+            // Record poison encounter regardless of whether damage was resisted or taken
+            consumptionHistory.Add(new ConsumptionEvent
+            {
+                timeStamp = lifetime,
+                position = other.transform.position,
+                itemType = "Poison"
+            });
+
             if (Random.value < SimulationManager.PoisonDamageChance)
             {
                 poisonEatenCount++;
                 energy -= 40f;
                 LastReward -= 15f;
-                poisonEatenCount++;
+
+                SpawnFloatingText(transform.position, 40, true);
 
                 if (audioSource != null && poisonEatClip != null)
                 {
                     audioSource.PlayOneShot(poisonEatClip, soundVolume);
                 }
 
-                if (energy <= 0f) Die();
-            } else {
+                if (energy <= 0f)
+                {
+                    // Push terminal death transition to memory BEFORE calling Die()
+                    float[] nextState = GetSensorState(Vector2.zero);
+                    memory.Push(LastState, LastAction, LastReward - 20f, nextState, true, false);
+                    Die();
+                }
+            } 
+            else 
+            {
                 // Resisted / Dodged: No damage taken
                 SpawnCombatText("Resist!", Color.gray);
                 poisonResistedCount++;
+                //LastReward += 1.0f; // Small encouragement for surviving near poison
             }
 
-            // Always consume/respawn the poison dot regardless of whether damage was dealt
+            // Reset distance tracking so respawn teleport isn't counted as movement
+            previousPoisonDistance = -1f;
+            currentPoisonDistance = -1f;
+
             other.gameObject.GetComponent<SpawnItem>()?.Respawn();
         }
         else if (other.CompareTag("Player") || other.CompareTag("Agent"))
         {
-            AgentController peer = other.GetComponent<AgentController>();
+            AgentController peer = other.GetComponentInParent<AgentController>(); // Use InParent
             if (peer != null && peer.isAlive && peer.energy > 0f && Time.time >= lastSiphonTime + siphonCooldown)
             {
                 ResolveLifeSteal(peer);
@@ -585,8 +843,6 @@ public class AgentController : MonoBehaviour
 
     private void ResolveLifeSteal(AgentController peer)
     {
-        Debug.Log($"[Combat] Agent #{agentIndex} collided with Agent #{peer.agentIndex}. Energy: {this.energy} vs {peer.energy}");
-
         if (!isAlive || peer == null || !peer.isAlive || peer.energy <= 0f) return;
 
         if (this.energy >= peer.energy)
@@ -602,13 +858,32 @@ public class AgentController : MonoBehaviour
             this.lastSiphonTime = Time.time;
             bitesDeliveredCount++;
 
+            // 1. Log attack audio/event
+            consumptionHistory.Add(new ConsumptionEvent
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                itemType = "Attack"
+            });
+
+            // 2. Force a snapshot capture of this prey right at the moment of the bite
+            lifeHistory.Add(new AgentSnapshot
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                rotationAngle = transform.eulerAngles.z,
+                energy = energy,
+                actionTaken = LastAction,
+                reward = LastReward,
+                sensorState = LastState != null ? (float[])LastState.Clone() : new float[11],
+                hasThreatVisible = false,
+                hasPreyVisible = true,
+                preyWorldPos = peer.transform.position // Exact position of victim
+            });
+
             if (swordClashClip != null && audioSource != null)
             {
                 audioSource.PlayOneShot(swordClashClip, soundVolume);
-            }
-            if (swordClashClip == null)
-            {
-                Debug.LogError($"[Audio] Agent #{agentIndex} collided, but swordClashClip is NULL!");
             }
 
             StartCoroutine(FlashColor(Color.magenta, 0.15f));
@@ -626,6 +901,34 @@ public class AgentController : MonoBehaviour
         bitesReceivedCount++;
         LastReward -= 10f;
 
+        //SpawnFloatingText(transform.position, amount, true);
+
+        // 1. Log attacked audio/event
+        consumptionHistory.Add(new ConsumptionEvent
+        {
+            timeStamp = lifetime,
+            position = transform.position,
+            itemType = "Attacked"
+        });
+
+        // 2. Force a snapshot capture showing the predator attacking us
+        if (attacker != null)
+        {
+            lifeHistory.Add(new AgentSnapshot
+            {
+                timeStamp = lifetime,
+                position = transform.position,
+                rotationAngle = transform.eulerAngles.z,
+                energy = energy,
+                actionTaken = LastAction,
+                reward = LastReward,
+                sensorState = LastState != null ? (float[])LastState.Clone() : new float[11],
+                hasThreatVisible = true,
+                threatWorldPos = attacker.transform.position, // Exact position of attacker
+                hasPreyVisible = false
+            });
+        }
+
         StartCoroutine(FlashColor(Color.red, 0.15f));
         SpawnCombatText($"-{amount:F0}", new Color(1f, 0.25f, 0.25f));
 
@@ -641,63 +944,68 @@ public class AgentController : MonoBehaviour
         if (energy <= 0f) Die();
     }
 
+    public void SpawnFloatingText(Vector3 pos, int amount, bool isDamage)
+    {
+        if (combatTextPrefab != null)
+        {
+            Vector3 spawnPos = new Vector3(pos.x + Random.Range(-0.2f, 0.2f), pos.y + 0.8f, -0.6f);
+            GameObject popup = Instantiate(combatTextPrefab, spawnPos, Quaternion.identity);
+            FloatingCombatText fct = popup.GetComponent<FloatingCombatText>();
+            if (fct != null)
+            {
+                fct.Setup(amount, isCritical: amount >= 20, isDamage: isDamage);
+            }
+        }
+    }
+
     private void Die()
     {
         isAlive = false;
         LastReward -= 20f;
 
-        if (visionRing != null)
-        {
-            visionRing.enabled = false;
-        }
+        if (visionRing != null) visionRing.enabled = false;
+        if (overheadText != null) overheadText.gameObject.SetActive(false);
 
-        // Hide overhead HUD so dead agents don't bleed through the leaderboard UI
-        if (overheadText != null)
-        {
-            overheadText.gameObject.SetActive(false);
-        }
-
-        // Play death sound effect
         if (deathClip != null)
         {
             AudioSource.PlayClipAtPoint(deathClip, new Vector3(transform.position.x, transform.position.y, -10f), soundVolume);
         }
 
-        // Shift layer and tag
-        gameObject.layer = 2; // "Ignore Raycast"
+        // Hide sensory rays
+        if (liveFoodLine != null) liveFoodLine.enabled = false;
+        if (livePoisonLine != null) livePoisonLine.enabled = false;
+        if (liveThreatLine != null) liveThreatLine.enabled = false;
+        if (livePreyLine != null) livePreyLine.enabled = false;
+
+        // Shift root and all children to Layer 2 ("Ignore Raycast") and untag
+        gameObject.layer = 2;
         gameObject.tag = "Untagged";
+        foreach (Transform child in transform)
+        {
+            child.gameObject.layer = 2;
+            child.gameObject.tag = "Untagged";
+        }
 
-        // Completely disable all colliders on both the root object and children
-        Collider2D rootCol = GetComponent<Collider2D>();
-        if (rootCol != null) rootCol.enabled = false;
-
-        Collider2D[] allColliders = GetComponentsInChildren<Collider2D>();
+        // Disable all colliders on self and children
+        Collider2D[] allColliders = GetComponentsInChildren<Collider2D>(true);
         foreach (var col in allColliders)
         {
             col.enabled = false;
         }
 
-        // Shut down Rigidbody completely
+        // Completely freeze and shut off the Rigidbody2D
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
-            rb.simulated = false; // Prevents any physical interaction with moving agents
+            rb.simulated = false; // Disables physical simulation completely
         }
 
-        //SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        //if (sr != null) sr.color = new Color(0.35f, 0.35f, 0.35f, 0.5f); // Dim and slightly transparent
-        // --- SWAP TO DEAD SPRITE ---
+        // Swap to dead sprite
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
         if (sr != null)
         {
-            if (deadSprite != null)
-            {
-                sr.sprite = deadSprite;
-            }
-
-            // Keep the corpse visible with a subtle dim or tint
-            // If your dead sprite is already stylized/colored, use pure Color.white:
+            if (deadSprite != null) sr.sprite = deadSprite;
             sr.color = new Color(0.7f, 0.7f, 0.7f, 0.85f);
         }
 
@@ -741,18 +1049,56 @@ public class AgentController : MonoBehaviour
         if (policyNet != null)
         {
             float[] hidden;
-            float[] probeFood = new float[] { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1f };
-            float[] qFood = policyNet.Forward(probeFood, out hidden);
-            foodScore = qFood[0] - ((qFood[1] + qFood[2] + qFood[3]) / 3f);
 
-            float[] probePoison = new float[] { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1f };
-            float[] qPoison = policyNet.Forward(probePoison, out hidden);
-            poisonPenalty = ((qPoison[1] + qPoison[2] + qPoison[3]) / 3f) - qPoison[0];
+            // Probe 1: Food directly UP (Does agent prefer Action 0: Up over Action 1: Down?)
+            float[] probeFoodUp = new float[] { 0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   0f, 0f,   1f };
+            float[] qFoodUp = policyNet.Forward(probeFoodUp, out hidden);
+            float foodScoreUp = qFoodUp[0] - qFoodUp[1]; // Up vs Down
 
-            if (foodEatenCount > poisonEatenCount * 2 && foodScore > 0f) drive = "Forager";
-            else if (bitesDeliveredCount > 3) drive = "Apex Hunter";
-            else if (poisonPenalty > 0.5f) drive = "Survivalist (Cautious)";
-            else if (epsilon > 0.2f) drive = "Explorer";
+            // Probe 2: Food directly RIGHT (Does agent prefer Action 3: Right over Action 2: Left?)
+            float[] probeFoodRight = new float[] { 0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   0f, 0f,   1f };
+            float[] qFoodRight = policyNet.Forward(probeFoodRight, out hidden);
+            float foodScoreRight = qFoodRight[3] - qFoodRight[2]; // Right vs Left
+
+            foodScore = (foodScoreUp + foodScoreRight) * 0.5f;
+
+            // Probe 3: Poison directly UP (Does agent prefer Action 1: Down/Retreat over Action 0: Up/Hazard?)
+            float[] probePoisonUp = new float[] { 0f, 0f,   0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   1f };
+            float[] qPoisonUp = policyNet.Forward(probePoisonUp, out hidden);
+            float poisonAvoidUp = qPoisonUp[1] - qPoisonUp[0]; // Down (retreat) minus Up (danger)
+
+            // Probe 4: Poison directly RIGHT (Does agent prefer Action 2: Left/Retreat over Action 3: Right/Hazard?)
+            float[] probePoisonRight = new float[] { 0f, 0f,   0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   1f };
+            float[] qPoisonRight = policyNet.Forward(probePoisonRight, out hidden);
+            float poisonAvoidRight = qPoisonRight[2] - qPoisonRight[3]; // Left (retreat) minus Right (danger)
+
+            poisonPenalty = (poisonAvoidUp + poisonAvoidRight) * 0.5f;
+
+            // --- REFINED ARCHETYPE ASSIGNMENT ---
+            if (bitesDeliveredCount >= 2)
+            {
+                drive = "Apex Predator";
+            }
+            else if (foodEatenCount >= 3 && (foodScore > 0f || foodEatenCount > poisonEatenCount))
+            {
+                drive = "Forager";
+            }
+            else if (poisonResistedCount >= 2 || poisonPenalty > 0.005f)
+            {
+                drive = "Cautious Survivor";
+            }
+            else if (lifetime > 45f && foodEatenCount == 0)
+            {
+                drive = "Nomadic Pacifist";
+            }
+            else if (memory != null && memory.Count > 3000 && Mathf.Abs(foodScore) < 0.02f && Mathf.Abs(poisonPenalty) < 0.02f)
+            {
+                drive = "Indecisive Wanderer";
+            }
+            else
+            {
+                drive = "Erratic Explorer";
+            }
         }
 
         int totalMemory = memory != null ? memory.Count : 0;
@@ -770,9 +1116,9 @@ public class AgentController : MonoBehaviour
             bitesDelivered = bitesDeliveredCount,
             bitesReceived = bitesReceivedCount,
             
-            // Ensure these exist and are assigned:
             wasEverPossessed = hasBeenPossessed,
             playerObservationsLogged = playerMemoriesImprinted,
+            peerObservationsLogged = peerMemoriesImprinted,
             playerInfluencePercent = influence,
 
             experiencesLogged = totalMemory,
@@ -820,19 +1166,25 @@ public class AgentController : MonoBehaviour
 
         visionRing = ringObj.AddComponent<LineRenderer>();
         visionRing.useWorldSpace = false;
-        visionRing.loop = false; // <-- Changed from true to false
+        visionRing.loop = false;
 
-        visionRing.material = new Material(Shader.Find("Sprites/Default"));
-        
+        // Apply dashed material setup identical to replay
+        Texture2D dashTex = CreateDashTexture();
+        Material dashMat = new Material(Shader.Find("Sprites/Default"));
+        dashMat.mainTexture = dashTex;
+
+        visionRing.material = dashMat;
+        visionRing.textureMode = LineTextureMode.Tile;
+
         Color ringColor = new Color(0.2f, 0.8f, 0.2f, 0.35f);
         visionRing.startColor = ringColor;
         visionRing.endColor = ringColor;
 
-        visionRing.startWidth = 0.08f;
-        visionRing.endWidth = 0.08f;
-        visionRing.sortingOrder = 1;
+        visionRing.startWidth = 0.05f;
+        visionRing.endWidth = 0.05f;
+        visionRing.sortingOrder = 4;
 
-        DrawVisionArc(24);
+        DrawVisionArc(32);
     }
 
     public void UpdateVisionRadius(float newRadius)
@@ -862,34 +1214,35 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    public void DrawVisionArc(int segments = 24)
+    public void DrawVisionArc(int segments = 32)
     {
         if (visionRing == null) return;
 
-        // We need segments + 2 points: Center -> Arc Points -> Center
         visionRing.positionCount = segments + 2;
 
-        float scaleFactor = transform.lossyScale.x != 0f ? transform.lossyScale.x : 1f;
-        float unscaledRadius = visionRadius / scaleFactor;
-
-        // Convert vision angle spread to radians centered around 0 (forward)
         float halfAngleRad = (visionAngle * 0.5f) * Mathf.Deg2Rad;
         float startAngle = -halfAngleRad;
         float deltaAngle = (visionAngle * Mathf.Deg2Rad) / segments;
 
-        // Point 0: Start at center
+        // Point 0: Center
         visionRing.SetPosition(0, Vector3.zero);
 
         // Points 1 to segments+1: The curved perimeter
         for (int i = 0; i <= segments; i++)
         {
             float theta = startAngle + (deltaAngle * i);
-            float x = unscaledRadius * Mathf.Cos(theta);
-            float y = unscaledRadius * Mathf.Sin(theta);
+            float x = visionRadius * Mathf.Cos(theta);
+            float y = visionRadius * Mathf.Sin(theta);
             visionRing.SetPosition(i + 1, new Vector3(x, y, 0f));
         }
 
-        // Final Point: Back to center to complete the wedge
+        // Return to center
         visionRing.SetPosition(segments + 1, Vector3.zero);
+
+        // Scale dashes along the length of the line
+        if (visionRing.material != null)
+        {
+            visionRing.material.mainTextureScale = new Vector2(4f, 1f);
+        }
     }
 }

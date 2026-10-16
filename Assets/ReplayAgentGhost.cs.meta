@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: df960a059bafb334f885d22d3bd15fd8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - ghostRenderer: {instanceID: 0}
+  - foodSensorLine: {instanceID: 0}
+  - poisonSensorLine: {instanceID: 0}
+  - preySensorLine: {instanceID: 0}
+  - threatSensorLine: {instanceID: 0}
+  - visionConeLine: {instanceID: 0}
+  - sourceAgent: {instanceID: 0}
+  - overheadText: {instanceID: 0}
+  - floatingTextPrefab: {fileID: 5803082682146875728, guid: be2bfb7a01f4d75bfb2da0f6da751e89, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

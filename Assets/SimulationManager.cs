@@ -18,9 +18,16 @@ public class SimulationManager : MonoBehaviour
     public TMP_InputField inputAgents;
     public Slider sliderAgents;
     public TMP_InputField inputFood;
+    public Slider sliderFood;
     public TMP_InputField inputPoison;
+    public Slider sliderPoison;
+    public TMP_InputField inputPoisonChance;
+    public Slider sliderPoisonChance;
     public TMP_InputField inputVision;
-    public Slider inputPoisonChance;
+    public Slider sliderVision;
+    public TMP_InputField inputVisionAngle;
+    public Slider sliderVisionAngle;
+
     // Normalized runtime chance (0.0f to 1.0f)
     public static float PoisonDamageChance = 0.5f;
 
@@ -31,10 +38,11 @@ public class SimulationManager : MonoBehaviour
     private int lastHoveredLine = -1;
 
     [Header("Simulation Parameters (Defaults)")]
-    public int agentCount = 6;
+    public int agentCount = 10;
     public int foodCount = 40;
     public int poisonCount = 20;
-    public int globalVisionRadius = 5;
+    public int globalVisionRadius = 10;
+    public float globalVisionAngle = 90f;
 
     [HideInInspector] public Vector2 arenaSize;
     
@@ -47,83 +55,329 @@ public class SimulationManager : MonoBehaviour
     private bool simulationRunning = false;
     private bool gameOverTriggered = false;
 
-    [Header("In-Game HUD / Controls")]
+    [Header("In-Game Runtime Controls")]
     public GameObject BtnStopSimulation; // Reference to the stop button
+    public Slider sliderSimulationSpeed;
+    public TextMeshProUGUI txtSpeedValue; // Optional: Displays "1.0x", "2.0x", etc.
 
     [Header("Audio")]
     public AudioSource musicSource;
+    public AudioClip introSoundClip;
 
     [Header("Possession Management")]
     public AgentController currentlyPossessedAgent;
 
     [Header("Setup Panel Controls")]
-    public Toggle toggleRespawn;
+    public Toggle toggleFoodRespawn;
+    public Toggle togglePoisonRespawn;
 
     [Header("Live Running HUD")]
     public TextMeshProUGUI txtRunningStats;
+    public TextMeshProUGUI txtLiveLegend;
     private float simulationElapsedTime = 0f;
 
-    [Header("Agent Brain Inspection")]
+    [Header("Agent Brain Inspection & Replay")]
     public GameObject brainInspectorPanel;
     public TextMeshProUGUI txtBrainDetails;
+    public Button btnReplayLife;
+    public AgentLifeReplayer lifeReplayer;
+    private AgentController inspectedAgentController;
     private List<AgentRecord> cachedRecords = new List<AgentRecord>();
 
+    private HashSet<int> selectedAgentIds = new HashSet<int>();
+    public Button btnReplaySelected;
+    
+    
     void Start()
     {
-        if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false);
-        if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(false);
-        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false);
+        if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false); //
+        if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(false); 
+        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false); 
 
-        Camera cam = Camera.main;
-        if (cam != null && cam.orthographic)
+        Camera cam = Camera.main; 
+        if (cam != null && cam.orthographic) 
         {
-            float screenHeight = cam.orthographicSize;
-            float screenWidth = screenHeight * cam.aspect;
-            arenaSize = new Vector2(screenWidth * 0.9f, screenHeight * 0.9f);
+            float screenHeight = cam.orthographicSize; 
+            float screenWidth = screenHeight * cam.aspect; 
+            arenaSize = new Vector2(screenWidth * 0.9f, screenHeight * 0.9f); 
         }
         else
         {
-            arenaSize = new Vector2(16f, 9f);
+            arenaSize = new Vector2(16f, 9f); 
         }
 
-        if (sliderAgents != null)
+        if (inputAgents != null) inputAgents.text = agentCount.ToString(); 
+        if (inputFood != null) inputFood.text = foodCount.ToString(); 
+        if (inputPoison != null) inputPoison.text = poisonCount.ToString(); 
+        if (inputPoisonChance != null) inputPoisonChance.text = Mathf.RoundToInt(PoisonDamageChance * 100f).ToString();
+        if (inputVision != null) inputVision.text = globalVisionRadius.ToString(); 
+
+        if (setupPanel != null) setupPanel.SetActive(true); 
+        if (leaderboardPanel != null) leaderboardPanel.SetActive(false); 
+
+        //  Setup Agent Count Slider & bind listener in code
+        if (sliderAgents != null) 
         {
-            sliderAgents.wholeNumbers = true;
-            sliderAgents.minValue = 1f;
-            sliderAgents.maxValue = 20f;
+            sliderAgents.wholeNumbers = true; 
+            sliderAgents.minValue = 1f; // Clamped to 1 so you don't spawn 0 agents
+            sliderAgents.maxValue = 20f; 
             sliderAgents.value = agentCount;
+
+            // Automatically updates the agent text box whenever the slider moves:
+            sliderAgents.onValueChanged.RemoveAllListeners();
+            sliderAgents.onValueChanged.AddListener(delegate { UpdateNumberOfAgents(); });
         }
-        if (inputAgents != null) inputAgents.text = agentCount.ToString();
-        if (inputFood != null) inputFood.text = foodCount.ToString();
-        if (inputPoison != null) inputPoison.text = poisonCount.ToString();
-        if (inputVision != null) inputVision.text = globalVisionRadius.ToString();
 
-        if (setupPanel != null) setupPanel.SetActive(true);
-        if (leaderboardPanel != null) leaderboardPanel.SetActive(false);
-        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false);
-
-        if (sliderAgents != null)
+        // Setup Food Slider & bind listener in code
+        if (sliderFood != null) 
         {
-            sliderAgents.wholeNumbers = true;
-            sliderAgents.minValue = 0f;
-            sliderAgents.maxValue = 20f;
-            sliderAgents.value = float.Parse(inputAgents.text);
-            inputAgents.text = agentCount.ToString();
+            sliderFood.wholeNumbers = true; 
+            sliderFood.minValue = 0f; 
+            sliderFood.maxValue = 100f; 
+            if (inputFood.text != null  && int.TryParse(inputFood.text, out int x)) sliderFood.value = Mathf.Max(0, x);
+
+            // Automatically updates the food chance text box whenever the slider moves:
+            sliderFood.onValueChanged.RemoveAllListeners();
+            sliderFood.onValueChanged.AddListener(delegate { UpdateFood(); });
+
+            Debug.Log("[SimulationManager.cs] - Start() - sliderFood.value = " + sliderFood.value);
+        }
+
+        // Setup Poison Slider & bind listener in code
+        if (sliderPoison != null) 
+        {
+            sliderPoison.wholeNumbers = true; 
+            sliderPoison.minValue = 0f; 
+            sliderPoison.maxValue = 100f; 
+            if (inputPoison.text != null  && int.TryParse(inputPoison.text, out int x)) sliderPoison.value = Mathf.Max(0, x);
+
+            // Automatically updates the poison text box whenever the slider moves:
+            sliderPoison.onValueChanged.RemoveAllListeners();
+            sliderPoison.onValueChanged.AddListener(delegate { UpdatePoison(); });
+
+            Debug.Log("[SimulationManager.cs] - Start() - sliderPoison.value = " + sliderPoison.value);
+        }
+
+        // Setup Poison Chance Slider & bind listener in code
+        if (sliderPoisonChance != null) 
+        {
+            sliderPoisonChance.wholeNumbers = true; 
+            sliderPoisonChance.minValue = 0f; 
+            sliderPoisonChance.maxValue = 100f; 
+            sliderPoisonChance.value = Mathf.RoundToInt(PoisonDamageChance * 100f);
+
+            // Automatically updates the poison chance text box whenever the slider moves:
+            sliderPoisonChance.onValueChanged.RemoveAllListeners();
+            sliderPoisonChance.onValueChanged.AddListener(delegate { UpdatePoisonChance(); });
+        }
+
+        // Setup Vision Slider & bind listener in code
+        if (sliderVision != null) 
+        {
+            sliderVision.interactable = true; // Ensure UI interactable flag is ON
+            sliderVision.wholeNumbers = true; 
+            sliderVision.minValue = 1f; // Clamped to 1 so vision is never 0
+            sliderVision.maxValue = 20f; 
+
+            if (inputVision != null && int.TryParse(inputVision.text, out int v))
+            {
+                sliderVision.value = Mathf.Clamp(v, (int)sliderVision.minValue, (int)sliderVision.maxValue);
+            }
+            else
+            {
+                sliderVision.value = globalVisionRadius;
+            }
+
+            sliderVision.onValueChanged.RemoveAllListeners();
+            sliderVision.onValueChanged.AddListener(delegate { UpdateVisionFromSlider(); });
+
+            if (inputVision != null)
+            {
+                inputVision.onValueChanged.RemoveAllListeners();
+                inputVision.onValueChanged.AddListener(delegate { UpdateVisionFromInput(); });
+            }
+
+            Debug.Log("[SimulationManager.cs] - Start() - sliderVision.value = " + sliderVision.value);
+        }
+
+        if (inputVisionAngle != null) inputVisionAngle.text = Mathf.RoundToInt(globalVisionAngle).ToString();
+
+        // Setup Vision Angle Slider
+        if (sliderVisionAngle != null)
+        {
+            sliderVisionAngle.interactable = true;
+            sliderVisionAngle.wholeNumbers = true;
+            sliderVisionAngle.minValue = 15f;
+            sliderVisionAngle.maxValue = 120f;
+            sliderVisionAngle.value = globalVisionAngle;
+
+            sliderVisionAngle.onValueChanged.RemoveAllListeners();
+            sliderVisionAngle.onValueChanged.AddListener(delegate { UpdateVisionAngleFromSlider(); });
+
+            if (inputVisionAngle != null)
+            {
+                inputVisionAngle.onValueChanged.RemoveAllListeners();
+                inputVisionAngle.onValueChanged.AddListener(delegate { UpdateVisionAngleFromInput(); });
+            }
+        }
+
+        if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false);
+        if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(false); 
+        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false); 
+
+        // Setup Live Sensory Legend
+        if (txtLiveLegend != null)
+        {
+            txtLiveLegend.text = "<b><size=110%>Sensory Vectors</size></b>\n" +
+                                 "<color=#33FF33>■</color> Nearest Food\n" +
+                                 "<color=#FF3333>■</color> Nearest Hazard (Poison)\n" +
+                                 "<color=#FFC000>■</color> Prey Target (Weaker)\n" +
+                                 "<color=#E600E6>■</color> Threat (Predator)";
+
+            // Ensure sorting and visibility defaults
+            txtLiveLegend.color = new Color(1f, 1f, 1f, 0.85f);
+            txtLiveLegend.ForceMeshUpdate();
+            txtLiveLegend.gameObject.SetActive(true);
+
+            Debug.Log("[SimulationManager.cs] - Start() - txtLiveLegend.text = " + txtLiveLegend.text);
+        }
+
+        // Runtime user controls.
+        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false); 
+        if (sliderSimulationSpeed != null)
+        {
+            sliderSimulationSpeed.minValue = 0.5f; // Slow motion
+            sliderSimulationSpeed.maxValue = 5.0f; // 5x speed
+            sliderSimulationSpeed.value = 1.0f;    // Default standard speed
+
+            sliderSimulationSpeed.onValueChanged.RemoveAllListeners();
+            sliderSimulationSpeed.onValueChanged.AddListener(OnSpeedSliderChanged);
+        }
+
+        if (btnReplayLife != null)
+        {
+            btnReplayLife.onClick.RemoveAllListeners();
+            btnReplayLife.onClick.AddListener(StartReplayForCurrentAgent);
+        }
+    }
+
+    void Awake()
+    {
+        if (introSoundClip != null)
+        {
+            // Plays cleanly at full volume without needing an active AudioSource component
+            AudioSource.PlayClipAtPoint(introSoundClip, Camera.main != null ? Camera.main.transform.position : Vector3.zero, 1f);
+        }
+    }
+
+    public void UpdateNumberOfAgents()
+    {
+        Debug.Log($"[SimulationManager] In UpdateNumberOfAgents!");
+        if (sliderAgents != null && inputAgents != null)
+        {
+            inputAgents.text = Mathf.RoundToInt(sliderAgents.value).ToString();
+        }
+    }
+
+    public void UpdateFood()
+    {
+        Debug.Log($"[SimulationManager] In UpdateFood!");
+        if (sliderFood != null && inputFood != null)
+        {
+            inputFood.text = Mathf.RoundToInt(sliderFood.value).ToString();
+        }
+    }
+
+    public void UpdatePoison()
+    {
+        Debug.Log($"[SimulationManager] In UpdatePoison!");
+        if (sliderPoison != null && inputPoison != null)
+        {
+            inputPoison.text = Mathf.RoundToInt(sliderPoison.value).ToString();
+        }
+    }
+
+    public void UpdatePoisonChance()
+    {
+        Debug.Log($"[SimulationManager] In UpdatePoisonChance!");
+        if (sliderPoisonChance != null && inputPoisonChance != null)
+        {
+            inputPoisonChance.text = Mathf.RoundToInt(sliderPoisonChance.value).ToString();
+        }
+    }
+
+    public void UpdateVisionFromSlider()
+    {
+        if (sliderVision != null && inputVision != null)
+        {
+            inputVision.SetTextWithoutNotify(Mathf.RoundToInt(sliderVision.value).ToString());
+            globalVisionRadius = Mathf.RoundToInt(sliderVision.value);
+        }
+    }
+
+    public void UpdateVisionFromInput()
+    {
+        if (inputVision != null && sliderVision != null && int.TryParse(inputVision.text, out int val))
+        {
+            sliderVision.SetValueWithoutNotify(Mathf.Clamp(val, sliderVision.minValue, sliderVision.maxValue));
+            globalVisionRadius = Mathf.RoundToInt(sliderVision.value);
+        }
+    }
+
+    public void UpdateVisionAngleFromSlider()
+    {
+        if (sliderVisionAngle != null && inputVisionAngle != null)
+        {
+            inputVisionAngle.SetTextWithoutNotify(Mathf.RoundToInt(sliderVisionAngle.value).ToString());
+            globalVisionAngle = sliderVisionAngle.value;
+        }
+    }
+
+    public void UpdateVisionAngleFromInput()
+    {
+        if (inputVisionAngle != null && sliderVisionAngle != null && float.TryParse(inputVisionAngle.text, out float val))
+        {
+            sliderVisionAngle.SetValueWithoutNotify(Mathf.Clamp(val, sliderVisionAngle.minValue, sliderVisionAngle.maxValue));
+            globalVisionAngle = sliderVisionAngle.value;
+        }
+    }
+
+    public void StartReplayForCurrentAgent()
+    {
+        if (inspectedAgentController == null)
+        {
+            Debug.LogWarning("[SimulationManager] No agent selected for replay.");
+            return;
+        }
+
+        if (lifeReplayer == null)
+        {
+            Debug.LogError("[SimulationManager] 'Life Replayer' is not assigned in the Inspector!");
+            return;
+        }
+
+        // Hide or dim the brain details panel so the replay view takes focus
+        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false);
+        if (leaderboardPanel != null) leaderboardPanel.SetActive(false);
+
+        // Keep the speed slider active and bring to front if parented under HUD
+        if (sliderSimulationSpeed != null)
+        {
+            sliderSimulationSpeed.gameObject.SetActive(true);
+            sliderSimulationSpeed.transform.SetAsLastSibling();
+            // Apply current slider value to Time.timeScale
+            Time.timeScale = sliderSimulationSpeed.value;
         }
         else
         {
-            sliderAgents.value = 10;
-            inputAgents.text = "10";
+            Time.timeScale = 1f;
         }
 
+        if (txtLiveLegend != null) txtLiveLegend.gameObject.SetActive(false);
 
-        if (inputPoisonChance != null)
-        {
-            inputPoisonChance.wholeNumbers = true;
-            inputPoisonChance.minValue = 0f;
-            inputPoisonChance.maxValue = 100f;
-            inputPoisonChance.value = 50f; // Default 50%
-        }
+        lifeReplayer.gameObject.SetActive(true);
+        lifeReplayer.transform.SetAsLastSibling();
+        lifeReplayer.LoadAgent(inspectedAgentController);
     }
 
     public void StartSimulationFromUI()
@@ -131,30 +385,62 @@ public class SimulationManager : MonoBehaviour
         simulationElapsedTime = 0f;
         if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(true);
         if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(true);
+        
+        if (txtLiveLegend != null)
+        {
+            txtLiveLegend.gameObject.SetActive(true);
+            txtLiveLegend.transform.SetAsLastSibling(); // Brings it above background panels
+            txtLiveLegend.ForceMeshUpdate();
+        }
+
+        // Set speed settings
+        float startSpeed = sliderSimulationSpeed != null ? sliderSimulationSpeed.value : 1f;
+        OnSpeedSliderChanged(startSpeed);
 
         // Set the global respawn rule from the checkbox state
-        if (toggleRespawn != null)
-        {
-            global::SpawnItem.AllowRespawn = toggleRespawn.isOn;
-        }
-        else
-        {
-            global::SpawnItem.AllowRespawn = true;
-        }
+        // Apply independent respawn flags from the UI toggles
+        global::SpawnItem.AllowFoodRespawn = toggleFoodRespawn != null ? toggleFoodRespawn.isOn : true;
+        global::SpawnItem.AllowPoisonRespawn = togglePoisonRespawn != null ? togglePoisonRespawn.isOn : true;
 
         if (sliderAgents != null)
         {
             agentCount = Mathf.RoundToInt(sliderAgents.value);
             inputAgents.text = agentCount.ToString();
         }
-        //if (inputAgents != null && int.TryParse(inputAgents.text, out int a)) agentCount = Mathf.Max(1, a);
+        if (sliderFood != null)
+        {
+            inputFood.text = sliderFood.value.ToString();
+        }
+        if (sliderPoison != null)
+        {
+            inputPoison.text = sliderPoison.value.ToString();
+        }
+        if (sliderPoisonChance != null)
+        {
+            inputPoisonChance.text = (Mathf.RoundToInt(sliderPoisonChance.value)).ToString();
+        }
+        if (sliderVision != null)
+        {
+            inputVision.text = sliderVision.value.ToString();
+        }
+        if (sliderVisionAngle != null)
+        {
+            inputVisionAngle.text = sliderVisionAngle.value.ToString();
+        }
+        if (inputVisionAngle != null && float.TryParse(inputVisionAngle.text, out float va))
+        {
+            globalVisionAngle = Mathf.Clamp(va, 15f, 120f);
+        }
+
         if (inputFood != null && int.TryParse(inputFood.text, out int f)) foodCount = Mathf.Max(0, f);
         if (inputPoison != null && int.TryParse(inputPoison.text, out int p)) poisonCount = Mathf.Max(0, p);
         if (inputVision != null && int.TryParse(inputVision.text, out int v)) globalVisionRadius = Mathf.Max(0, v);
         if (inputPoisonChance != null)
         {
             // Divide by 100f so 50 becomes 0.50f, 100 becomes 1.0f, etc.
-            PoisonDamageChance = inputPoisonChance.value / 100f;
+            //PoisonDamageChance = inputPoisonChance.value / 100f;
+            float.TryParse(inputPoisonChance.text, out PoisonDamageChance);
+            PoisonDamageChance = (PoisonDamageChance / 100f);
         }
 
         if (setupPanel != null) setupPanel.SetActive(false);
@@ -169,8 +455,9 @@ public class SimulationManager : MonoBehaviour
             AgentController controller = go.GetComponent<AgentController>();
             controller.agentIndex = i + 1;
             
-            // Updates both the internal radius and the visual ring vertices:
+            // Explicitly force the vision angle and radius
             controller.UpdateVisionRadius(globalVisionRadius);
+            controller.UpdateVisionAngle(globalVisionAngle);
             
             activeAgents.Add(controller);
             allSpawnedAgents.Add(controller);
@@ -246,13 +533,11 @@ public class SimulationManager : MonoBehaviour
         {
             Vector3 mousePos = Mouse.current.position.ReadValue();
 
-            // Canvas in Overlay mode requires a null camera for TMP link math
             Canvas parentCanvas = txtLeaderboardBody.canvas;
             Camera uiCamera = (parentCanvas != null && parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay) 
                 ? null 
                 : (parentCanvas != null ? parentCanvas.worldCamera : Camera.main);
 
-            // Force an update of the mesh data in case the text was just set
             txtLeaderboardBody.ForceMeshUpdate();
 
             int linkIndex = TMP_TextUtilities.FindIntersectingLink(txtLeaderboardBody, mousePos, uiCamera);
@@ -264,12 +549,150 @@ public class SimulationManager : MonoBehaviour
                 
                 Debug.Log($"<color=cyan>[UI] Clicked Link ID: {linkId}</color>");
 
-                if (int.TryParse(linkId, out int clickedAgentId))
+                // 1. Checkbox clicked: Toggle multi-replay selection
+                if (linkId.StartsWith("toggle_"))
                 {
-                    DisplayAgentBrain(clickedAgentId);
+                    string idPart = linkId.Substring("toggle_".Length);
+                    if (int.TryParse(idPart, out int clickedAgentId))
+                    {
+                        if (selectedAgentIds.Contains(clickedAgentId))
+                            selectedAgentIds.Remove(clickedAgentId);
+                        else
+                            selectedAgentIds.Add(clickedAgentId);
+
+                        UpdateLeaderboardVisualSelection();
+                    }
+                }
+                // 2. Agent Name clicked: Open Brain Inspector
+                else if (linkId.StartsWith("brain_"))
+                {
+                    string idPart = linkId.Substring("brain_".Length);
+                    if (int.TryParse(idPart, out int clickedAgentId))
+                    {
+                        DisplayAgentBrain(clickedAgentId);
+                    }
+                }
+                // Fallback for raw numeric ID
+                else if (int.TryParse(linkId, out int rawAgentId))
+                {
+                    DisplayAgentBrain(rawAgentId);
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Re-renders the leaderboard text body to show [X] checkboxes and highlights on selected agents.
+    /// </summary>
+    private void UpdateLeaderboardVisualSelection()
+    {
+        if (txtLeaderboardBody == null || cachedRecords == null || cachedRecords.Count == 0) return;
+
+        int livingCount = activeAgents.Count(a => a != null && a.isAlive);
+        int deadCount = allSpawnedAgents.Count - livingCount;
+
+        int totalFoodEaten = 0;
+        int totalPoisonEaten = 0;
+        int totalPoisonResisted = 0;
+        int totalBitesDelivered = 0;
+        int totalBitesReceived = 0;
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine("<b><color=#AAAAAA>SEL<pos=45>RANK<pos=95>AGENT<pos=185>LIVED<pos=255>FOOD<pos=325>POISON<pos=415>RESIST<pos=505>GAVE DMG<pos=615>TOOK DMG<pos=730>IMPRINT</color></b>");
+        sb.AppendLine("<color=#555555>---------------------------------------------------------------------------------------------------------------------------------</color>");
+
+        for (int i = 0; i < cachedRecords.Count; i++)
+        {
+            AgentRecord r = cachedRecords[i];
+            bool isSelected = selectedAgentIds != null && selectedAgentIds.Contains(r.agentId);
+
+            // Wrap the checkbox inside a toggle link
+            string checkSymbol = isSelected 
+                ? "<color=#00FFFF><b>[X]</b></color>" 
+                : "<color=#555555>[ ]</color>";
+            string selectBox = $"<link=\"toggle_{r.agentId}\">{checkSymbol}</link>";
+
+            string rank = (i == 0) ? "<color=#FFD700>#1 *</color>" : $"#{i + 1}";
+            string agentColor = isSelected ? "#00FFFF" : "#FFFFFF";
+            
+            // Prefix with "brain_" so clicking the name opens the inspector
+            string agentLink = $"<link=\"brain_{r.agentId}\"><color={agentColor}><u>Agent #{r.agentId}</u></color></link>";
+
+            string imprintDisplay;
+            if (r.wasEverPossessed)
+            {
+                imprintDisplay = "<color=#00FFFF>POSSESSED</color>";
+            }
+            else if (r.playerObservationsLogged > 0)
+            {
+                imprintDisplay = $"<color=#55FF55>{r.playerObservationsLogged}</color> <size=80%><color=#AAAAAA>({r.playerInfluencePercent:F0}%)</color></size>";
+            }
+            else
+            {
+                imprintDisplay = "<color=#555555>0 (0%)</color>";
+            }
+
+            sb.AppendLine($"{selectBox}<pos=45>{rank}<pos=95>{agentLink}<pos=185>{r.survivalTime:F1}s<pos=255>{r.foodEaten}<pos=325>{r.poisonEaten}<pos=415>{r.poisonResisted}<pos=505>{r.bitesDelivered}<pos=615>{r.bitesReceived}<pos=730>{imprintDisplay}");
+
+            totalFoodEaten += r.foodEaten;
+            totalPoisonEaten += r.poisonEaten;
+            totalPoisonResisted += r.poisonResisted;
+            totalBitesDelivered += r.bitesDelivered;
+            totalBitesReceived += r.bitesReceived;
+        }
+
+        sb.AppendLine("<color=#555555>---------------------------------------------------------------------------------------------------------------------------------</color>");
+
+        sb.AppendLine($"<b><color=#FFFFFF>TOTALS</color></b>" +
+                      $"<pos=255><b><color=#55FF55>{totalFoodEaten}</color></b>" +
+                      $"<pos=325><b><color=#FF5555>{totalPoisonEaten}</color></b>" +
+                      $"<pos=415><b><color=#00FFFF>{totalPoisonResisted}</color></b>" +
+                      $"<pos=505><b><color=#FFD700>{totalBitesDelivered}</color></b>" +
+                      $"<pos=615><b><color=#FFAAAA>{totalBitesReceived}</color></b>");
+
+        sb.AppendLine($"<b><color=#AAAAAA>AGENTS:</color></b> <color=#55FF55>{livingCount} Alive</color>  |  <color=#FF5555>{deadCount} Dead</color> <size=85%><color=#888888>({allSpawnedAgents.Count} Total)</color></size>");
+
+        txtLeaderboardBody.text = sb.ToString();
+        txtLeaderboardBody.ForceMeshUpdate();
+
+        // Update button text / state if assigned
+        if (btnReplaySelected != null)
+        {
+            btnReplaySelected.interactable = selectedAgentIds.Count > 0;
+            var btnText = btnReplaySelected.GetComponentInChildren<TextMeshProUGUI>();
+            if (btnText != null)
+            {
+                btnText.text = selectedAgentIds.Count > 0 
+                    ? $"Replay Selected ({selectedAgentIds.Count})" 
+                    : "Replay Selected";
+            }
+        }
+    }
+
+    public void StartMultiAgentReplay()
+    {
+        if (selectedAgentIds.Count == 0) return;
+
+        List<AgentController> targets = allSpawnedAgents
+            .Where(a => a != null && selectedAgentIds.Contains(a.agentIndex))
+            .ToList();
+
+        // Temporarily hide original dead agent GameObjects so they don't block the ghosts
+        foreach (var agent in allSpawnedAgents)
+        {
+            if (agent != null) agent.gameObject.SetActive(false);
+        }
+
+        if (leaderboardPanel != null) leaderboardPanel.SetActive(false);
+        if (brainInspectorPanel != null) brainInspectorPanel.SetActive(false);
+
+        if (txtLiveLegend != null) txtLiveLegend.gameObject.SetActive(false);
+
+        lifeReplayer.gameObject.SetActive(true);
+        lifeReplayer.transform.SetAsLastSibling();
+        
+        // Pass both selected targets and allSpawnedAgents
+        lifeReplayer.LoadSelectedAgents(targets, allSpawnedAgents);
     }
 
     private void HandleLeaderboardHover()
@@ -339,6 +762,15 @@ public class SimulationManager : MonoBehaviour
             return;
         }
 
+        inspectedAgentController = allSpawnedAgents.Find(a => a != null && a.agentIndex == agentId);
+
+        if (btnReplayLife != null)
+        {
+            // Only enable the button if the agent actually has recorded history
+            bool hasHistory = inspectedAgentController != null && inspectedAgentController.lifeHistory != null && inspectedAgentController.lifeHistory.Count > 0;
+            btnReplayLife.interactable = hasHistory;
+        }
+        
         AgentRecord record = cachedRecords[index];
 
         if (brainInspectorPanel != null)
@@ -357,15 +789,25 @@ public class SimulationManager : MonoBehaviour
             ? "<color=#00FFFF>Directly Player-Controlled</color>"
             : $"<color=#55FF55>{record.playerObservationsLogged} steps</color> ({record.playerInfluencePercent:F1}% of memory)";
 
-        txtBrainDetails.text = 
-            $"<b><size=120%><color=#FFD700>Agent #{record.agentId} Brain Summary</color></size></b>\n\n" +
-            $"<b>Archetype:</b> <color=#00FFFF>{record.primaryDrive}</color>\n" +
-            $"<b>Replay Memories:</b> {record.experiencesLogged} steps\n" +
-            $"<b>Player Imprint / Imitation:</b> {influenceText}\n" +
-            $"<b>Exploration vs Exploitation:</b> {(1f - record.finalEpsilon) * 100f:F1}% Policy Driven\n\n" +
-            $"<b>Learned Instincts:</b>\n" +
-            $"• Food Seeking Drive: {(record.foodAffinity > 0f ? "<color=#55FF55>High (+)</color>" : "<color=#AAAAAA>Low (0)</color>")}\n" +
-            $"• Poison Avoidance: {(record.poisonAvoidance > 0f ? "<color=#55FF55>Cautious (+)</color>" : "<color=#FF5555>Blind (-)</color>")}";
+            string foodStatus = record.foodAffinity > 0.005f 
+                ? $"<color=#55FF55>High (+{record.foodAffinity:F3})</color>" 
+                : $"<color=#AAAAAA>Low ({record.foodAffinity:F3})</color>";
+
+            string poisonStatus = record.poisonAvoidance > 0.005f 
+                ? $"<color=#55FF55>Cautious (+{record.poisonAvoidance:F3})</color>" 
+                : $"<color=#FF5555>Blind ({record.poisonAvoidance:F3})</color>";
+
+            txtBrainDetails.text = 
+                $"<b><size=120%><color=#FFD700>Agent #{record.agentId} Brain Summary</color></size></b>\n\n" +
+                $"<b>Archetype:</b> <color=#00FFFF>{record.primaryDrive}</color>\n" +
+                $"<b>Replay Memories:</b> {record.experiencesLogged} steps\n" +
+                $"<b>Peer Observations:</b> <color=#FFAA55>{record.peerObservationsLogged} steps</color>\n" +
+                $"<b>Player Imprint / Imitation:</b> {influenceText}\n" +
+                $"<b>Exploration vs Exploitation:</b> {(1f - record.finalEpsilon) * 100f:F1}% Policy Driven\n\n" +
+                $"<b>Learned Instincts:</b>\n" +
+                $"• Food Seeking Drive: {foodStatus}\n" +
+                $"• Poison Avoidance: {poisonStatus}";
+                
             // Force the text mesh to re-render immediately
             txtBrainDetails.ForceMeshUpdate();
         }
@@ -375,6 +817,14 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
+    public void OnClickStartReplay()
+    {
+        if (inspectedAgentController != null && lifeReplayer != null)
+        {
+            lifeReplayer.gameObject.SetActive(true);
+            lifeReplayer.LoadAgent(inspectedAgentController);
+        }
+    }
 
     private void UpdateRunningStatsHUD()
     {
@@ -522,36 +972,37 @@ public class SimulationManager : MonoBehaviour
         Debug.Log("<color=cyan>[ShowLeaderboard] Method called!</color>");
         leaderboardPanel.transform.SetAsLastSibling();
         
-        if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false); //
-        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false); //
+        if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false);
+        if (BtnStopSimulation != null) BtnStopSimulation.SetActive(false);
+        if (txtLiveLegend != null) txtLiveLegend.gameObject.SetActive(false);
 
-        if (musicSource != null && musicSource.isPlaying) //
+        if (musicSource != null && musicSource.isPlaying)
         {
-            musicSource.Stop(); //
+            musicSource.Stop();
         }
 
-        gameOverTriggered = true; //
+        gameOverTriggered = true;
 
-        if (leaderboardPanel == null) //
+        if (leaderboardPanel == null)
         {
-            Debug.LogError("[SimulationManager] 'Leaderboard Panel' slot is NOT assigned in the Inspector!"); //
-            return; //
+            Debug.LogError("[SimulationManager] 'Leaderboard Panel' slot is NOT assigned in the Inspector!");
+            return;
         }
 
-        leaderboardPanel.SetActive(true); //
+        leaderboardPanel.SetActive(true);
         Debug.Log($"<color=cyan>[ShowLeaderboard] LeaderboardPanel activeSelf is now: {leaderboardPanel.activeSelf}</color>");
 
         if (rowHighlightRect != null) rowHighlightRect.gameObject.SetActive(false);
         lastHoveredLine = -1;
 
-        List<AgentRecord> records = allSpawnedAgents //
-            .Where(a => a != null) //
-            .Select(a => a.GetRecord()) //
-            .OrderByDescending(r => r.survivalTime) //
-            .ToList(); //
+        List<AgentRecord> records = allSpawnedAgents
+            .Where(a => a != null)
+            .Select(a => a.GetRecord())
+            .OrderByDescending(r => r.survivalTime)
+            .ToList();
 
-        int livingCount = activeAgents.Count(a => a != null && a.isAlive); //
-        int deadCount = allSpawnedAgents.Count - livingCount; //
+        int livingCount = activeAgents.Count(a => a != null && a.isAlive);
+        int deadCount = allSpawnedAgents.Count - livingCount;
 
         int totalFoodEaten = 0;
         int totalPoisonEaten = 0;
@@ -560,15 +1011,18 @@ public class SimulationManager : MonoBehaviour
         int totalBitesReceived = 0;
 
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        //sb.AppendLine("<b><color=#AAAAAA>RANK<pos=60>AGENT<pos=155>LIVED<pos=225>FOOD<pos=275>POIS<pos=325>RES<pos=375>GAVE DMG<pos=465>TOOK DMG<pos=565>IMPRINT</color></b>");
-        sb.AppendLine("<b><color=#AAAAAA>RANK<pos=60>AGENT<pos=155>LIVED<pos=225>FOOD<pos=295>POISON<pos=385>RESIST<pos=475>GAVE DMG<pos=585>TOOK DMG<pos=700>IMPRINT</color></b>");
+        sb.AppendLine("<b><color=#AAAAAA>SEL<pos=45>RANK<pos=95>AGENT<pos=185>LIVED<pos=255>FOOD<pos=325>POISON<pos=415>RESIST<pos=505>GAVE DMG<pos=615>TOOK DMG<pos=730>IMPRINT</color></b>");
         sb.AppendLine("<color=#555555>---------------------------------------------------------------------------------------------------------------------------------</color>");
 
         for (int i = 0; i < records.Count; i++)
         {
             AgentRecord r = records[i];
             string rank = (i == 0) ? "<color=#FFD700>#1 *</color>" : $"#{i + 1}";
-            string agentLink = $"<link=\"{r.agentId}\"><u>Agent #{r.agentId}</u></link>";
+            
+            // Checkbox link
+            string selectBox = $"<link=\"toggle_{r.agentId}\"><color=#555555>[ ]</color></link>";
+            // Brain Inspector link
+            string agentLink = $"<link=\"brain_{r.agentId}\"><u>Agent #{r.agentId}</u></link>";
 
             string imprintDisplay;
             if (r.wasEverPossessed)
@@ -584,8 +1038,8 @@ public class SimulationManager : MonoBehaviour
                 imprintDisplay = "<color=#555555>0 (0%)</color>";
             }
 
-            // Data rows locked exactly to each header's column anchor:
-            sb.AppendLine($"{rank}<pos=60>{agentLink}<pos=155>{r.survivalTime:F1}s<pos=225>{r.foodEaten}<pos=295>{r.poisonEaten}<pos=385>{r.poisonResisted}<pos=475>{r.bitesDelivered}<pos=585>{r.bitesReceived}<pos=700>{imprintDisplay}");
+            // Aligned with the SEL column header
+            sb.AppendLine($"{selectBox}<pos=45>{rank}<pos=95>{agentLink}<pos=185>{r.survivalTime:F1}s<pos=255>{r.foodEaten}<pos=325>{r.poisonEaten}<pos=415>{r.poisonResisted}<pos=505>{r.bitesDelivered}<pos=615>{r.bitesReceived}<pos=730>{imprintDisplay}");
 
             totalFoodEaten += r.foodEaten;
             totalPoisonEaten += r.poisonEaten;
@@ -596,18 +1050,16 @@ public class SimulationManager : MonoBehaviour
 
         sb.AppendLine("<color=#555555>---------------------------------------------------------------------------------------------------------------------------------</color>");
         
-        // Align Totals directly beneath the corresponding columns:
         sb.AppendLine($"<b><color=#FFFFFF>TOTALS</color></b>" +
-                      $"<pos=225><b><color=#55FF55>{totalFoodEaten}</color></b>" +
-                      $"<pos=295><b><color=#FF5555>{totalPoisonEaten}</color></b>" +
-                      $"<pos=385><b><color=#00FFFF>{totalPoisonResisted}</color></b>" +
-                      $"<pos=475><b><color=#FFD700>{totalBitesDelivered}</color></b>" +
-                      $"<pos=585><b><color=#FFAAAA>{totalBitesReceived}</color></b>");
+                      $"<pos=255><b><color=#55FF55>{totalFoodEaten}</color></b>" +
+                      $"<pos=325><b><color=#FF5555>{totalPoisonEaten}</color></b>" +
+                      $"<pos=415><b><color=#00FFFF>{totalPoisonResisted}</color></b>" +
+                      $"<pos=505><b><color=#FFD700>{totalBitesDelivered}</color></b>" +
+                      $"<pos=615><b><color=#FFAAAA>{totalBitesReceived}</color></b>");
 
-        // Status Row: Living vs Dead Agents
         sb.AppendLine($"<b><color=#AAAAAA>AGENTS:</color></b> <color=#55FF55>{livingCount} Alive</color>  |  <color=#FF5555>{deadCount} Dead</color> <size=85%><color=#888888>({allSpawnedAgents.Count} Total)</color></size>");
 
-        if (txtLeaderboardBody != null) //
+        if (txtLeaderboardBody != null)
         {
             txtLeaderboardBody.text = sb.ToString();
         }
@@ -625,6 +1077,13 @@ public class SimulationManager : MonoBehaviour
         {
             txtLeaderboardBody.gameObject.SetActive(true);
         }
+
+        // Reset speed
+        Time.timeScale = 1f;
+        if (musicSource != null) musicSource.pitch = 1f;
+
+        // Clear selected agents for replay
+        selectedAgentIds.Clear();
     }
 
     public void OnRestartSameParameters()
@@ -632,11 +1091,17 @@ public class SimulationManager : MonoBehaviour
         simulationElapsedTime = 0f;
         if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(true);
         if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(true);
-
-        if (toggleRespawn != null)
+        
+        if (txtLiveLegend != null)
         {
-            global::SpawnItem.AllowRespawn = toggleRespawn.isOn;
+            txtLiveLegend.gameObject.SetActive(true);
+            txtLiveLegend.transform.SetAsLastSibling(); // Brings it above background panels
+            txtLiveLegend.ForceMeshUpdate();
         }
+
+        // Retain the independent respawn settings
+        global::SpawnItem.AllowFoodRespawn = toggleFoodRespawn != null ? toggleFoodRespawn.isOn : true;
+        global::SpawnItem.AllowPoisonRespawn = togglePoisonRespawn != null ? togglePoisonRespawn.isOn : true;
 
         CleanupEnvironment();
 
@@ -656,6 +1121,7 @@ public class SimulationManager : MonoBehaviour
 
             // Updates both the internal radius and the visual ring vertices:
             controller.UpdateVisionRadius(globalVisionRadius);
+            controller.UpdateVisionAngle(120f);
 
             activeAgents.Add(controller);
             allSpawnedAgents.Add(controller);
@@ -676,6 +1142,7 @@ public class SimulationManager : MonoBehaviour
         simulationElapsedTime = 0f;
         if (txtRunningStats != null) txtRunningStats.gameObject.SetActive(false);
         if (BtnStopSimulation != null) BtnStopSimulation.gameObject.SetActive(false);
+        if (txtLiveLegend != null) txtLiveLegend.gameObject.SetActive(false);
 
         CleanupEnvironment();
 
@@ -688,6 +1155,28 @@ public class SimulationManager : MonoBehaviour
         if (musicSource != null && musicSource.isPlaying)
         {
             musicSource.Stop(); // or musicSource.Pause();
+        }
+
+        // Reset Speed
+        Time.timeScale = 1f;
+        if (musicSource != null) musicSource.pitch = 1f;
+    }
+
+    public void OnSpeedSliderChanged(float speed)
+    {
+        // 1. Scale physics, agent timers, and fixed updates
+        Time.timeScale = speed;
+
+        // 2. Adjust music playback speed/pitch proportionally
+        if (musicSource != null)
+        {
+            musicSource.pitch = speed;
+        }
+
+        // 3. Update UI text label if assigned
+        if (txtSpeedValue != null)
+        {
+            txtSpeedValue.text = $"{speed:F1}x";
         }
     }
 
@@ -718,6 +1207,9 @@ public class SimulationManager : MonoBehaviour
 
         stepCounter = 0;
         ReleaseCurrentAgent();
+
+        // Clear selected agents for replay
+        selectedAgentIds.Clear();
     }
 
     // Call this from the UI Button or by pressing the Escape key
@@ -742,6 +1234,10 @@ public class SimulationManager : MonoBehaviour
 
         // 3. Trigger the leaderboard with current stats
         ShowLeaderboard();
+
+        // Reset speed
+        Time.timeScale = 1f;
+        if (musicSource != null) musicSource.pitch = 1f;
     }
 
     public void QuitApplication()
@@ -753,11 +1249,5 @@ public class SimulationManager : MonoBehaviour
         #else
             Application.Quit();
         #endif
-    }
-
-    public void UpdateNumberOfAgents()
-    {
-        Debug.Log("<color=orange>[SimulationManager] in UpdateNumberOfAgents(): </color>" + sliderAgents.value.ToString());
-        inputAgents.text = sliderAgents.value.ToString();
     }
 }

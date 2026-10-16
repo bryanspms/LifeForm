@@ -1,0 +1,50 @@
+#Zip up Runtime Files for GitHub (25MB size limit)
+cd /mnt/f9b12936-eaad-4e0c-9526-d7604f290474/UnityProjects/Deployment
+# 1. Zip and split the Linux build into 20MB chunks
+zip -r -s 20m LifeForm-Linux.zip LifeForm-Linux/
+# 2. Zip and split the Windows build into 20MB chunks
+zip -r -s 20m LifeForm-Windows.zip LifeForm-Windows/
+
+
+# Backup Unity Project:
+tar -czvf LifeForm_Backup_$(date +%F).tar.gz \
+  --exclude='LifeForm/Library' \
+  --exclude='LifeForm/Temp' \
+  --exclude='LifeForm/Logs' \
+  --exclude='LifeForm/Builds' \
+  --exclude='LifeForm/obj' \
+  --exclude='LifeForm/.vs' \
+  LifeForm/
+
+  tar -czvf "/run/media/bryan-price/BSP-CLOUD/Backup/Unity/LifeForm/LifeForm_Backup_$(date +%F).tar.gz" \
+  --exclude='LifeForm/Library' \
+  --exclude='LifeForm/Temp' \
+  --exclude='LifeForm/Logs' \
+  --exclude='LifeForm/Build' \
+  --exclude='LifeForm/Builds' \
+  --exclude='LifeForm/obj' \
+  --exclude='LifeForm/.vs' \
+  LifeForm/
+
+
+BSP Drive:
+  /dev/sda: LABEL="BSP" UUID="f9b12936-eaad-4e0c-9526-d7604f290474" BLOCK_SIZE="4096" TYPE="ext4"
+
+  sudo rsync -avh /opt/project-nomad/mysql/ /mnt/f9b12936-eaad-4e0c-9526-d7604f290474/mnt/data/project-nomad
+  sudo rsync -avh /opt/project-nomad/redis/ /mnt/f9b12936-eaad-4e0c-9526-d7604f290474/mnt/data/project-nomad/redis/
+
+  sudo docker compose -p project-nomad -f /mnt/f9b12936-eaad-4e0c-9526-d7604f290474/mnt/data/project-nomad/compose.yml up -d
+
+
+OLD="/opt/project-nomad/storage"
+NEW="/mnt/f9b12936-eaad-4e0c-9526-d7604f290474/mnt/data/project-nomad/storage"
+
+echo "=== OLD ==="
+du -sh "$OLD"
+find "$OLD" -type f | wc -l
+find "$OLD" -type d | wc -l
+
+echo "=== NEW ==="
+du -sh "$NEW"
+find "$NEW" -type f | wc -l
+find "$NEW" -type d | wc -l
