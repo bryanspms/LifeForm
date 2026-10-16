@@ -2,18 +2,17 @@
 
 LifeForm is an autonomous multi-agent artificial life simulator running on a Deep Q-Network (DQN) decision cycle. Organisms continuously perceive an 11-dimensional state vector (relative bearings to food, poison, threats, prey, and health ratios), select directional actions using epsilon-greedy exploration, and store transition vectors into an experience replay buffer.
 
-+-------------------------------------------------------------------------+
-|                           SIMULATION LOOP                               |
-|                                                                         |
-|   [Sensors (11-D)] ---> [DQN Policy (11->32->4)] ---> [Action (WASD)]   |
-|           |                                              |              |
-|           v                                              v              |
-|   [State Vector] ---> [Experience Buffer] <--- [Reward / Combat Event]  |
-|                             |                                           |
-|                             v                                           |
-|                   [Behavior Profiling]                                  |
-|                 (Forager / Apex Hunter)                                 |
-+-------------------------------------------------------------------------+
+
+```mermaid
+flowchart TD
+    SENSORS["Sensors (11-D)"] --> POLICY["DQN Policy (11 → 32 → 4)"]
+    POLICY --> ACTION["Action (WASD)"]
+    SENSORS --> STATE["State Vector"]
+    STATE --> BUFFER["Experience Buffer"]
+    ACTION --> REWARD["Reward / Combat Event"]
+    REWARD --> BUFFER
+    BUFFER --> PROFILE["Behavior Profiling\n(Forager / Apex Hunter)"]
+```
 
 The runtime workflow consists of three operating states:
 1. Live Simulation & Environment: Agents forage, siphon energy from peers, and update neural policies.
