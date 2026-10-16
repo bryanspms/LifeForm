@@ -2,7 +2,6 @@
 
 LifeForm is an autonomous multi-agent artificial life simulator running on a Deep Q-Network (DQN) decision cycle. Organisms continuously perceive an 11-dimensional state vector (relative bearings to food, poison, threats, prey, and health ratios), select directional actions using epsilon-greedy exploration, and store transition vectors into an experience replay buffer.
 
-
 ```mermaid
 flowchart TD
     SENSORS["Sensors (11-D)"] --> POLICY["DQN Policy (11 → 32 → 4)"]
@@ -38,10 +37,10 @@ The runtime workflow consists of three operating states:
 * Monitoring Autonomous Agents:
   * Vision Cones: Dashed green lines outline each organism's field of view. Only resources and peers within this arc trigger sensory vectors.
   * Live Sensory Vectors & Legend: Colored rays project toward perceived targets within the cone:
-    * Green (■): Nearest Food
-    * Red (■): Nearest Hazard (Poison)
-    * Gold (■): Prey Target (Weaker peer)
-    * Magenta (■): Threat (Stronger predator peer)
+    * ![#33FF33](https://placehold.co/15x15/33FF33/33FF33.png) `Nearest Food`
+    * ![#FF3333](https://placehold.co/15x15/FF3333/FF3333.png) `Nearest Hazard (Poison)`
+    * ![#FFC000](https://placehold.co/15x15/FFC000/FFC000.png) `Prey Target (Weaker peer)`
+    * ![#E600E6](https://placehold.co/15x15/E600E6/E600E6.png) `Threat (Stronger predator peer)`
   * Food (Green): Consumed for +30 energy and +10 reward. Spawns floating green +HP popups.
   * Poison (Red/Pink): Inflicts -40 energy and -15 penalty when damage is taken; displays gray "Resist!" when dodged.
   * Predation & Siphoning: When organisms collide, the higher-energy agent siphons up to 15 energy from the weaker peer, triggering sword clash audio and floating damage numbers (+HP / -HP). Dead organisms freeze physics (`rb.simulated = false`) and are ignored by living agents.
