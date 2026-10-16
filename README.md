@@ -94,15 +94,17 @@ In Desktop Mode:
 2. Click **Games** > **Add a Non-Steam Game to My Library**.
 3. Browse to `~/Games/LifeForm/LifeForm-Linux/LifeForm.x86_64`, add it, and return to Gaming Mode.
 
+
+For operational instructions, please see:  [LifeForm Operational Guide](LifeForm-Operational-Guide.md)
 ---
 
 ## Windows Installation
 
 1. Download all split archive parts for Windows into the same folder:
-   * `LifeForm-Windows.zip.001`, `LifeForm-Windows.zip.002`, `LifeForm-Windows.zip.003`
+   * `LifeForm-Windows.zip.001`, `LifeForm-Windows.zip.002`, etc. (or `.z01`, `.z02`, `.zip`)
 
 ### Option A: Using 7-Zip or WinRAR (Recommended)
-1. Right-click `LifeForm-Windows.zip.001`.
+1. Right-click `LifeForm-Windows.zip.001` (or `LifeForm-Windows.zip`).
 2. Select **7-Zip** > **Extract to "LifeForm-Windows"** (7-Zip automatically stitches all volumes together).
 3. Open the folder and double-click `LifeForm.exe`.
 
@@ -110,13 +112,15 @@ In Desktop Mode:
 If using `.z01` / `.zip` split sets without 7-Zip:
 ```powershell
 # Combine the parts into a single archive
-cmd /c copy /b LifeForm-Windows.zip.001 + LifeForm-Windows.zip.002 + LifeForm-Windows.zip.003 LifeForm-Windows-Complete.zip
+cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
 
 # Extract the archive
 Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
 ```
 Launch by double-clicking `LifeForm.exe` inside `LifeForm-Windows`.
 
+
+For operational instructions, please see:  [LifeForm Operational Guide](LifeForm-Operational-Guide.md)
 ---
 
 # System Architecture
@@ -500,6 +504,10 @@ Assets/
 └── Resources/                # Prefabs and UI materials
 ```
 
+---
+# Documentation
+
+* [Operational Guide](LifeForm-Operational-Guide.md) – Detailed setup, live arena controls, human demonstration steps, and replay analysis.
 ---
 
 # Future Development
