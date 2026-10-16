@@ -99,10 +99,10 @@ In Desktop Mode:
 ## Windows Installation
 
 1. Download all split archive parts for Windows into the same folder:
-   * `LifeForm-Windows.zip.001`, `LifeForm-Windows.zip.002`, etc. (or `.z01`, `.z02`, `.zip`)
+   * `LifeForm-Windows.zip.001`, `LifeForm-Windows.zip.002`, `LifeForm-Windows.zip.003`
 
 ### Option A: Using 7-Zip or WinRAR (Recommended)
-1. Right-click `LifeForm-Windows.zip.001` (or `LifeForm-Windows.zip`).
+1. Right-click `LifeForm-Windows.zip.001`.
 2. Select **7-Zip** > **Extract to "LifeForm-Windows"** (7-Zip automatically stitches all volumes together).
 3. Open the folder and double-click `LifeForm.exe`.
 
@@ -110,7 +110,7 @@ In Desktop Mode:
 If using `.z01` / `.zip` split sets without 7-Zip:
 ```powershell
 # Combine the parts into a single archive
-cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
+cmd /c copy /b LifeForm-Windows.zip.001 + LifeForm-Windows.zip.002 + LifeForm-Windows.zip.003 LifeForm-Windows-Complete.zip
 
 # Extract the archive
 Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
