@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 473a649c984ddf88d86b89730cf4d9ff
+guid: c2f5819f23665e5408c33e54e38dde73
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5998126299942814058
-    second: LifeForm-Setup_0
+      213: 5464884942652496047
+    second: LifeForm-Setup 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -102,13 +102,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: LifeForm-Setup_0
+      name: LifeForm-Setup 1_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 397
-        height: 364
+        width: 537
+        height: 383
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -117,8 +117,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 69efafdd8ef52cca0800000000000000
-      internalID: -5998126299942814058
+      spriteID: fa8de21b6eb27db40800000000000000
+      internalID: 5464884942652496047
       vertices: []
       indices: 
       edges: []
@@ -137,7 +137,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      LifeForm-Setup_0: -5998126299942814058
+      LifeForm-Setup 1_0: 5464884942652496047
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

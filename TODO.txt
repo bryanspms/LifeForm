@@ -4,8 +4,6 @@ Completed on 10/13/2026 - Add sensor lines to the agents in the simulation arena
 
 Completed - Find out if there is a way to make common methods for the simulation and replay in regards to the cone of vision.
 
-(4) Have the food re-appear in the replay and disappear when eaten.
-
 Completed on 10/12/2026 - Add new field for "Vision Angle"
 
 
