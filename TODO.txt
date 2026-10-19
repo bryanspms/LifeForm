@@ -8,4 +8,11 @@ Completed - Find out if there is a way to make common methods for the simulation
 
 Completed on 10/12/2026 - Add new field for "Vision Angle"
 
+(6) When an agent is possessed, it should also learn from the movements.  
+Note:
+While possessed:
+Autonomous neural control is bypassed.
+Movement transitions are tagged as demonstration data (actionTaken = -1).
+Nearby organisms within visual range observe demonstrated movements and store discounted rewards into their own replay buffers.
 
+***Remove the "action taken = -1" line of code.  the idea is that we are an ascended master emparting knowledge into the environment.
