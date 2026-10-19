@@ -14,5 +14,4 @@ While possessed:
 Autonomous neural control is bypassed.
 Movement transitions are tagged as demonstration data (actionTaken = -1).
 Nearby organisms within visual range observe demonstrated movements and store discounted rewards into their own replay buffers.
-
-***Remove the "action taken = -1" line of code.  the idea is that we are an ascended master emparting knowledge into the environment.
+***Remove the "action taken = -1" line of code.  the idea is that we are an ascended master emparting knowledge into the environment.The agent is both our student and teacher.***
