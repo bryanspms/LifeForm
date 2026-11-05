@@ -476,6 +476,45 @@ The repository excludes generated folders (`Library/`, `Temp/`, `Logs/`, `Build/
 2. Select **Windows** or **Linux**.
 3. Click **Build** and choose your output directory.
 
+## Release / Deployment Workflow (master only)
+
+This repo uses **`master` only** (`main` was deleted, `origin/HEAD -> origin/master`).
+
+Standalone builds live in:
+```text
+/mnt/f9b12936-eaad-4e0c-9526-d7604f290474/UnityProjects/Deployment/
+  LifeForm-Linux/
+  LifeForm-Windows/
+```
+The repo root holds only the split release archives:
+```text
+LifeForm-Linux.7z.001 / .002 ...
+LifeForm-Windows.7z.001 / .002 / .003 ...
+```
+No `*.zip*` files are kept — old zips are deleted on each release. Chunks are 20MB (`-v20m`) to stay under GitHub's 100MB per-file limit.
+
+All steps are automated by `deploy-and-push.sh` in the repo root. It:
+1. Deletes files in `Deployment/` root (keeps the two build folders)
+2. Runs `7z a -t7z -mx=7 -v20m LifeForm-Linux.7z LifeForm-Linux/` and the same for Windows
+3. Deletes `*.zip*` / `*.7z*` in the repo root
+4. Copies the new `.7z.001...` chunks to the repo root
+5. Commits and pushes to `origin/master`
+
+```bash
+sudo apt install p7zip-full git -y
+chmod +x deploy-and-push.sh
+./deploy-and-push.sh --dry-run "test release"
+./deploy-and-push.sh "deploy linux + windows builds"
+```
+
+Verify after pushing:
+```bash
+git status --short  # should be clean
+ls -lh *.7z.*      # 5 files, no *.zip*
+file Assets/LifeForm-Setup.png  # should say PNG image data
+```
+Then hard-refresh GitHub (`Ctrl+Shift+R`) on branch `master`. Note: GitHub shows the last commit date, not your laptop's file-creation date, so files show "just now" only after a successful push.
+
 ---
 
 ## Troubleshooting
