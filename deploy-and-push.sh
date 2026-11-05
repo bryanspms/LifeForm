@@ -15,7 +15,7 @@ set -e
 
 PROJECT_DIR="/home/bryan-price/Documents/UnityProjects/LifeForm"
 REMOTE_URL="https://github.com/bryanspms/LifeForm.git"
-BRANCH="main"
+BRANCH="master"
 
 DEPLOY_SRC="/mnt/f9b12936-eaad-4e0c-9526-d7604f290474/UnityProjects/Deployment"
 LINUX_FOLDER="LifeForm-Linux"
@@ -189,7 +189,12 @@ if [ -z "$CURRENT_BRANCH" ]; then
   run "git checkout -b \"$BRANCH\" 2>/dev/null || true"
 elif [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
   echo "Switching from $CURRENT_BRANCH to $BRANCH..."
-  run "git checkout -B \"$BRANCH\""
+  run "git checkout \"$BRANCH\""
+  # One-time migration: if coming from main, bring its commits into master
+  if [ "$CURRENT_BRANCH" = "main" ] && git show-ref --verify --quiet refs/heads/main; then
+    echo "Merging main into $BRANCH..."
+    run "git merge main --no-edit || true"
+  fi
 fi
 
 echo ""
