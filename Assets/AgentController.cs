@@ -62,8 +62,6 @@ public class AgentController : MonoBehaviour
     private bool lastHasThreat;
     private Vector2 lastNearestPreyPos;
     private bool lastHasPrey;
-    private bool lastHasFood;
-    private Vector2 lastNearestFoodPos;
 
     [Header("Manual Possession")]
     public bool isPossessed = false;
@@ -112,9 +110,10 @@ public class AgentController : MonoBehaviour
     private float lastSiphonTime = 0f;
 
     [Header("Hyperparameters")]
-    public float epsilon = 0.35f;
-    public float epsilonMin = 0.05f;
-    public float epsilonDecay = 0.999f;
+    [Tooltip("Exploration rate — bumped for 8-way movement (was 0.35 for 4 actions)")]
+    public float epsilon = 0.5f;
+    public float epsilonMin = 0.08f;
+    public float epsilonDecay = 0.9995f;
     public float gamma = 0.95f;
     public float learningRate = 0.005f;
 
@@ -132,7 +131,14 @@ public class AgentController : MonoBehaviour
     [HideInInspector] public List<ConsumptionEvent> consumptionHistory = new List<ConsumptionEvent>();
 
     private Rigidbody2D rb;
-    private Vector2[] actions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+    // 8-way movement: 0=Up, 1=Down, 2=Left, 3=Right, 4=NE, 5=SE, 6=NW, 7=SW
+    // Diagonals are normalized so diagonal speed == cardinal speed.
+    private Vector2[] actions = {
+        Vector2.up, Vector2.down, Vector2.left, Vector2.right,
+        new Vector2(1f, 1f).normalized, new Vector2(1f, -1f).normalized,
+        new Vector2(-1f, 1f).normalized, new Vector2(-1f, -1f).normalized
+    };
+    public const int ACTION_COUNT = 8;
     private float moveSpeed = 4f;
 
     private AudioSource audioSource;
@@ -192,9 +198,8 @@ public class AgentController : MonoBehaviour
             aliveSprite = sr.sprite; // Capture the living sprite on spawn
         }
 
-        policyNet = new NeuralNetwork(13, 32, 4);
+        policyNet = new NeuralNetwork(11, 32, ACTION_COUNT);
         targetNet = policyNet.Clone();
-
         /* =========================================================================================
          * REPLAY BUFFER CAPACITY & MEMORY TUNING GUIDE
          * =========================================================================================
@@ -293,8 +298,7 @@ public class AgentController : MonoBehaviour
 
     private void UpdateLiveSensoryRays()
     {
-        //if (!showLiveSensors || LastState == null || LastState.Length < 10) return;
-        if (LastState == null || LastState.Length < 13) return;
+        if (!showLiveSensors || LastState == null || LastState.Length < 10) return;
 
         Vector3 origin = new Vector3(transform.position.x, transform.position.y, -0.5f);
         Vector3 foodDir = new Vector3(LastState[2], LastState[3], 0f);
@@ -427,9 +431,7 @@ public class AgentController : MonoBehaviour
 
         lastHasThreat = false;
         lastHasPrey = false;
-        lastHasFood = false;
-        
-        lastNearestFoodPos = Vector2.zero;
+
         lastNearestThreatPos = Vector2.zero;
         lastNearestPreyPos = Vector2.zero;
 
@@ -495,22 +497,10 @@ public class AgentController : MonoBehaviour
 
             float dist = Vector2.Distance(transform.position, hit.transform.position);
 
-            if (hit.CompareTag("Food"))
+            if (hit.CompareTag("Food") && dist < minFDist)
             {
-                float fDist = Vector2.Distance(transform.position, hit.transform.position);
-
-                // Check angle: if within visionAngle OR within immediate proximity (under 1.5 units), keep target
-                angleToTarget = Vector2.Angle(forward, dirToTarget);
-                if (angleToTarget > (visionAngle * 0.5f) && fDist > 1.5f)
-                    continue;
-
-                if (fDist < minFDist)
-                {
-                    minFDist = fDist;
-                    nearestFoodDir = dirToTarget;
-                    lastNearestFoodPos = hit.transform.position;
-                    lastHasFood = true;
-                }
+                minFDist = dist;
+                nearestFoodDir = ((Vector2)hit.transform.position - (Vector2)transform.position).normalized;
             }
             else if (hit.CompareTag("Poison") && dist < minPDist)
             {
@@ -529,52 +519,28 @@ public class AgentController : MonoBehaviour
         currentFoodDistance = (minFDist < float.MaxValue) ? minFDist : -1f;
         currentPoisonDistance = (minPDist < float.MaxValue) ? minPDist : -1f;
 
-        float foodDistNorm =
-            (minFDist < float.MaxValue)
-                ? 1f - Mathf.Clamp01(minFDist / visionRadius)
-                : 0f;
-
-        float poisonDistNorm =
-            (minPDist < float.MaxValue)
-                ? 1f - Mathf.Clamp01(minPDist / visionRadius)
-                : 0f;
-
         float healthRatio = Mathf.Clamp01(energy / 100f);
 
-        return new float[]
-        {
-            normX,
-            normY,
-
-            nearestFoodDir.x,
-            nearestFoodDir.y,
-
-            nearestPoisonDir.x,
-            nearestPoisonDir.y,
-
-            nearestThreatDir.x,
-            nearestThreatDir.y,
-
-            nearestPreyDir.x,
-            nearestPreyDir.y,
-
-            healthRatio,
-
-            foodDistNorm,
-            poisonDistNorm
+        return new float[] {
+            normX, normY,
+            nearestFoodDir.x, nearestFoodDir.y,
+            nearestPoisonDir.x, nearestPoisonDir.y,
+            nearestThreatDir.x, nearestThreatDir.y,
+            nearestPreyDir.x, nearestPreyDir.y,
+            healthRatio
         };
     }
 
     public int SelectAction(float[] state)
     {
-        if (Random.value < epsilon) return Random.Range(0, 4);
+        if (Random.value < epsilon) return Random.Range(0, ACTION_COUNT);
 
         float[] hidden;
         float[] q = policyNet.Forward(state, out hidden);
 
         int bestAction = 0;
         float bestVal = q[0];
-        for (int i = 1; i < 4; i++)
+        for (int i = 1; i < ACTION_COUNT; i++)
         {
             if (q[i] > bestVal)
             {
@@ -600,14 +566,6 @@ public class AgentController : MonoBehaviour
         if (isPossessed)
         {
             energy -= 0.04f;
-            if (energy < 30f)
-            {
-                LastReward -= 0.05f;
-            } else if (energy < 15f)
-            {
-                LastReward -= 0.15f;
-            }
-
             if (energy <= 0f) Die();
 
             // Wrap boundaries for possessed player
@@ -662,16 +620,14 @@ public class AgentController : MonoBehaviour
             return;
         }
 
-        // --- 1. SENSOR & ACTION SELECTION ---
         float desperation = 1f - Mathf.Clamp01(energy / 100f);
         int dynamicInterval = Mathf.RoundToInt(Mathf.Lerp(DECISION_INTERVAL, 3, desperation));
 
         if (decisionCooldown <= 0)
         {
-            // ALWAYS update sensor state before selecting an action
             LastState = GetSensorState(arenaBounds);
             LastAction = SelectAction(LastState);
-            LastReward = 0f;
+            LastReward = 0f; // Reset per decision frame so rewards accurately reflect immediate transitions
             decisionCooldown = dynamicInterval;
         }
         else
@@ -679,33 +635,20 @@ public class AgentController : MonoBehaviour
             decisionCooldown--;
         }
 
-        // --- 2. OVERSHOOT PREVENTION ON APPROACH ---
-        // If close to food (within 1.8 units), dampen the desperation sprint so we don't overshoot
-        float currentFoodDist = Vector2.Distance(transform.position, lastNearestFoodPos);
-        float speedMultiplier = 1f + (desperation * 0.75f);
-        if (lastHasFood && currentFoodDist < 1.8f)
-        {
-            // Smoothly drop speed back toward base moveSpeed as we get within reach
-            speedMultiplier = Mathf.Lerp(1.0f, speedMultiplier, currentFoodDist / 1.8f);
-        }
-
         float dynamicSpeed = moveSpeed * (1f + desperation * 0.75f);
         Vector2 targetVelocity = actions[LastAction] * dynamicSpeed;
-        
-        // When close to food, sharpen steering response to make crisp 90-degree adjustments
         float steerResponsiveness = Mathf.Lerp(0.25f, 0.55f, desperation);
-        if (lastHasFood && currentFoodDist < 1.8f)
-        {
-            steerResponsiveness = 0.85f;
-        }
 
         rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, targetVelocity, steerResponsiveness);
 
-        // Orient body along direction of motion
+        // Rotate agent to face current direction so the vision arc aims forward
         if (targetVelocity.sqrMagnitude > 0.01f)
         {
             float angle = Mathf.Atan2(targetVelocity.y, targetVelocity.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, 0, angle);
+            // Testing...
+            LastState = GetSensorState(arenaBounds);
+            // /////////////////////////////////////
         }
 
         // Wrap around screen boundaries
@@ -721,13 +664,6 @@ public class AgentController : MonoBehaviour
 
         energy -= 0.04f;
         LastReward -= 0.005f;
-        if (energy < 30f)
-        {
-            LastReward -= 0.05f;
-        } else if (energy < 15f)
-        {
-            LastReward -= 0.15f;
-        }
 
         // Give a tiny positive reward if the agent reduces its distance to the nearest visible food item.
         // This gives the agent a "scent trail" so it doesn't need to bump into food purely by luck before learning begins.
@@ -737,8 +673,7 @@ public class AgentController : MonoBehaviour
         if (currentFoodDistance > 0f && previousFoodDistance > 0f)
         {
             float distanceDelta = previousFoodDistance - currentFoodDistance;
-            float hunger = 1f - Mathf.Clamp01(energy / 100f);
-            LastReward += distanceDelta * Mathf.Lerp(0.5f, 2.0f, hunger);
+            LastReward += distanceDelta * 0.05f;
         }
         previousFoodDistance = currentFoodDistance;
 
@@ -808,7 +743,9 @@ public class AgentController : MonoBehaviour
     {
         if (memory.Count < 32 || !isAlive) return;
 
-        for (int i = 0; i < 4; i++)
+        // 8 training samples per tick (was 4 for 4 actions) — covers the larger
+        // 8-action space without extra cost: net is tiny (11-32-8).
+        for (int i = 0; i < 8; i++)
         {
             Experience exp = memory.Sample();
             float targetQ = exp.Reward;
@@ -839,10 +776,7 @@ public class AgentController : MonoBehaviour
         if (other.CompareTag("Food"))
         {
             energy += 30f;
-            //LastReward += 25f;
-            float hunger = 1f - Mathf.Clamp01(energy / 100f);
-            LastReward += 20f + (hunger * 20f);
-
+            LastReward += 10f;
             foodEatenCount++;
 
             SpawnFloatingText(transform.position, 30, false);
@@ -1126,27 +1060,27 @@ public class AgentController : MonoBehaviour
         {
             float[] hidden;
 
-            // Probe 1: Food directly UP (Does agent prefer Action 0: Up over Action 1: Down?)
-            float[] probeFoodUp = new float[] { 0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   0f, 0f,   1f, 1f, 0f };
+            // Probe 1: Food directly UP (prefer Up/NE/NW over Down/SE/SW)
+            float[] probeFoodUp = new float[] { 0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   0f, 0f,   1f };
             float[] qFoodUp = policyNet.Forward(probeFoodUp, out hidden);
-            float foodScoreUp = qFoodUp[0] - qFoodUp[1]; // Up vs Down
+            float foodScoreUp = (qFoodUp[0] + qFoodUp[4] + qFoodUp[6]) / 3f - (qFoodUp[1] + qFoodUp[5] + qFoodUp[7]) / 3f;
 
-            // Probe 2: Food directly RIGHT (Does agent prefer Action 3: Right over Action 2: Left?)
-            float[] probeFoodRight = new float[] { 0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   0f, 0f,   1f, 1f, 0f };
+            // Probe 2: Food directly RIGHT (prefer Right/NE/SE over Left/NW/SW)
+            float[] probeFoodRight = new float[] { 0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   0f, 0f,   1f };
             float[] qFoodRight = policyNet.Forward(probeFoodRight, out hidden);
-            float foodScoreRight = qFoodRight[3] - qFoodRight[2]; // Right vs Left
+            float foodScoreRight = (qFoodRight[3] + qFoodRight[4] + qFoodRight[5]) / 3f - (qFoodRight[2] + qFoodRight[6] + qFoodRight[7]) / 3f;
 
             foodScore = (foodScoreUp + foodScoreRight) * 0.5f;
 
-            // Probe 3: Poison directly UP (Does agent prefer Action 1: Down/Retreat over Action 0: Up/Hazard?)
-            float[] probePoisonUp = new float[] { 0f, 0f,   0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   1f, 1f, 0f, 1f, 0f };
+            // Probe 3: Poison directly UP (prefer retreat Down/SE/SW over Up/NE/NW)
+            float[] probePoisonUp = new float[] { 0f, 0f,   0f, 0f,   0f, 1f,   0f, 0f,   0f, 0f,   1f };
             float[] qPoisonUp = policyNet.Forward(probePoisonUp, out hidden);
-            float poisonAvoidUp = qPoisonUp[1] - qPoisonUp[0]; // Down (retreat) minus Up (danger)
+            float poisonAvoidUp = (qPoisonUp[1] + qPoisonUp[5] + qPoisonUp[7]) / 3f - (qPoisonUp[0] + qPoisonUp[4] + qPoisonUp[6]) / 3f;
 
-            // Probe 4: Poison directly RIGHT (Does agent prefer Action 2: Left/Retreat over Action 3: Right/Hazard?)
-            float[] probePoisonRight = new float[] { 0f, 0f,   0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   1f, 1f, 0f, 1f, 0f, 1f, 0f };
+            // Probe 4: Poison directly RIGHT (prefer retreat Left/NW/SW over Right/NE/SE)
+            float[] probePoisonRight = new float[] { 0f, 0f,   0f, 0f,   1f, 0f,   0f, 0f,   0f, 0f,   1f };
             float[] qPoisonRight = policyNet.Forward(probePoisonRight, out hidden);
-            float poisonAvoidRight = qPoisonRight[2] - qPoisonRight[3]; // Left (retreat) minus Right (danger)
+            float poisonAvoidRight = (qPoisonRight[2] + qPoisonRight[6] + qPoisonRight[7]) / 3f - (qPoisonRight[3] + qPoisonRight[4] + qPoisonRight[5]) / 3f;
 
             poisonPenalty = (poisonAvoidUp + poisonAvoidRight) * 0.5f;
 

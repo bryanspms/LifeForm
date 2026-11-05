@@ -142,7 +142,7 @@ flowchart TD
 
     SENSOR --> POLICY
 
-    POLICY[Policy Network<br/>11 → 32 → 4]
+    POLICY[Policy Network<br/>11 → 32 → 8]
 
     POLICY --> ACTION
 
@@ -288,7 +288,7 @@ Input Layer      11
       ↓
 Hidden Layer     32 (ReLU)
       ↓
-Output Layer      4 (Linear Q-values)
+Output Layer      8 (Linear Q-values)
 ```
 
 Inputs:
@@ -305,9 +305,13 @@ Outputs:
 1 = Move Down
 2 = Move Left
 3 = Move Right
+4 = Move North-East (Up + Right, normalized)
+5 = Move South-East (Down + Right, normalized)
+6 = Move North-West (Up + Left, normalized)
+7 = Move South-West (Down + Left, normalized)
 ```
 
-Action selection uses epsilon-greedy exploration.
+Action selection uses epsilon-greedy exploration (epsilon = 0.5, min = 0.08, decay = 0.9995). Diagonals are normalized so diagonal speed equals cardinal speed. Each training tick samples 8 experiences from replay.
 
 ---
 

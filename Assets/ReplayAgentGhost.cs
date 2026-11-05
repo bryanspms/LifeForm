@@ -247,6 +247,11 @@ public class ReplayAgentGhost : MonoBehaviour
         // Combat Damage Detection during forward playback
         if (lastEvaluatedTime >= 0f && snap.timeStamp > lastEvaluatedTime)
         {
+            Debug.Log(
+                $"Agent #{sourceAgent.agentIndex} " +
+                $"HP Prev={lastEvaluatedEnergy:F1} " +
+                $"HP Now={snap.energy:F1}");
+            
             if (lastEvaluatedEnergy > 0f && snap.energy < lastEvaluatedEnergy)
             {
                 float hpLost = lastEvaluatedEnergy - snap.energy;
@@ -391,6 +396,8 @@ public class ReplayAgentGhost : MonoBehaviour
 
     private void SpawnCombatPopup(Vector2 position, int damage)
     {
+        Debug.Log($"SPAWNING DAMAGE POPUP: {damage}");
+
         if (sourceAgent != null && sourceAgent.swordClashClip != null)
         {
             AudioSource.PlayClipAtPoint(sourceAgent.swordClashClip, Camera.main != null ? Camera.main.transform.position : Vector3.zero, sourceAgent.soundVolume);

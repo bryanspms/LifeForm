@@ -325,7 +325,7 @@ public class AgentLifeReplayer : MonoBehaviour
                 if (timelineSlider != null) timelineSlider.SetValueWithoutNotify(currentReplayTime);
                 EvaluateAllGhosts(currentReplayTime);
 
-                yield return new WaitForSeconds(stepInterval);
+                yield return new WaitForSecondsRealtime(stepInterval);
             }
         }
         // 2. Single-Agent Playback Branch
@@ -338,7 +338,7 @@ public class AgentLifeReplayer : MonoBehaviour
                 if (timelineSlider != null) timelineSlider.SetValueWithoutNotify(currentFrame);
                 ApplySnapshot(currentFrame);
 
-                yield return new WaitForSeconds(stepInterval);
+                yield return new WaitForSecondsRealtime(stepInterval);
             }
         }
 
@@ -465,8 +465,8 @@ public class AgentLifeReplayer : MonoBehaviour
         }
 
         // 3. Update HUD stats
-        string[] actionNames = { "UP", "DOWN", "LEFT", "RIGHT" };
-        string actionStr = snap.actionTaken == -1 ? "PLAYER" : (snap.actionTaken >= 0 && snap.actionTaken < 4 ? actionNames[snap.actionTaken] : "?");
+        string[] actionNames = { "UP", "DOWN", "LEFT", "RIGHT", "NE", "SE", "NW", "SW" };
+        string actionStr = snap.actionTaken == -1 ? "PLAYER" : (snap.actionTaken >= 0 && snap.actionTaken < 8 ? actionNames[snap.actionTaken] : "?");
 
         if (txtTimestamp != null)
         {

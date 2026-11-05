@@ -4,8 +4,8 @@ LifeForm is an autonomous multi-agent artificial life simulator running on a Dee
 
 ```mermaid
 flowchart TD
-    SENSORS["Sensors (11-D)"] --> POLICY["DQN Policy (11 → 32 → 4)"]
-    POLICY --> ACTION["Action (WASD)"]
+    SENSORS["Sensors (11-D)"] --> POLICY["DQN Policy (11 → 32 → 8)"]
+    POLICY --> ACTION["Action (8-way)"]
     SENSORS --> STATE["State Vector"]
     STATE --> BUFFER["Experience Buffer"]
     ACTION --> REWARD["Reward / Combat Event"]
