@@ -64,22 +64,31 @@ The result is an ecosystem where learning can spread through observation, teachi
 
 ## Download & Installation (Standalone Releases)
 
-Due to file size constraints, standalone release packages are distributed as split 20MB archives (`.zip.001`, `.zip.002`, ... or `.z01`, `.z02`, ...). 
+Standalone releases are stored in this repo root as split 7-Zip archives in 20MB chunks:
+ * `LifeForm-Linux.7z.001`, `LifeForm-Linux.7z.002`, ...
+ * `LifeForm-Windows.7z.001`, `LifeForm-Windows.7z.002`, ...
 
-Ensure all archive parts for your operating system are downloaded into the **same folder** before extracting.
+Created with:
+```bash
+7z a -t7z -mx=7 -v20m LifeForm-Linux.7z LifeForm-Linux/
+7z a -t7z -mx=7 -v20m LifeForm-Windows.7z LifeForm-Windows/
+```
+
+Download **all parts** for your OS into the **same folder** before extracting. You need 7-Zip:
+- Linux: `sudo apt install p7zip-full -y`
+- Windows: https://www.7-zip.org/ or `winget install 7zip.7zip`
 
 ---
 
 ## Linux Installation (Ubuntu, Desktop Linux & Steam Deck)
 
-1. Download all split archive parts for Linux into the same folder:
-   * `LifeForm-Linux.zip.001`, `LifeForm-Linux.zip.002`, etc. (or `LifeForm-Linux.z01`, `LifeForm-Linux.zip`)
+1. Download all Linux parts into the same folder:
+   * `LifeForm-Linux.7z.001`, `LifeForm-Linux.7z.002`, etc.
 
-2. Open your terminal in that folder and extract using 7-Zip:
+2. Open your terminal in that folder and extract with 7-Zip (it auto-stitches all parts):
    ```bash
-   7z x LifeForm-Linux.zip.001 -o~/Games/LifeForm
+   7z x LifeForm-Linux.7z.001 -o~/Games/LifeForm
    ```
-   *(If distributed as standard zip volumes, recombine first: `zip -s 0 LifeForm-Linux.zip --out LifeForm-Linux-Complete.zip && unzip LifeForm-Linux-Complete.zip -d ~/Games/LifeForm`)*
 
 3. Set execution permissions and run:
    ```bash
@@ -100,22 +109,17 @@ For operational instructions, please see:  [LifeForm Operational Guide](LifeForm
 
 ## Windows Installation
 
-1. Download all split archive parts for Windows into the same folder:
-   * `LifeForm-Windows.zip.001`, `LifeForm-Windows.zip.002`, etc. (or `.z01`, `.z02`, `.zip`)
+1. Download all Windows parts into the same folder:
+   * `LifeForm-Windows.7z.001`, `LifeForm-Windows.7z.002`, etc.
 
-### Option A: Using 7-Zip or WinRAR (Recommended)
-1. Right-click `LifeForm-Windows.zip.001` (or `LifeForm-Windows.zip`).
+### Option A: Using 7-Zip (Recommended)
+1. Right-click `LifeForm-Windows.7z.001`.
 2. Select **7-Zip** > **Extract to "LifeForm-Windows"** (7-Zip automatically stitches all volumes together).
 3. Open the folder and double-click `LifeForm.exe`.
 
-### Option B: Using Windows PowerShell (No third-party tools)
-If using `.z01` / `.zip` split sets without 7-Zip:
+### Option B: Using 7-Zip command line
 ```powershell
-# Combine the parts into a single archive
-cmd /c copy /b LifeForm-Windows.z01 + LifeForm-Windows.z02 + LifeForm-Windows.zip LifeForm-Windows-Complete.zip
-
-# Extract the archive
-Expand-Archive -Path .\LifeForm-Windows-Complete.zip -DestinationPath .\LifeForm-Windows
+7z x LifeForm-Windows.7z.001 -oLifeForm-Windows
 ```
 Launch by double-clicking `LifeForm.exe` inside `LifeForm-Windows`.
 
@@ -142,7 +146,7 @@ flowchart TD
 
     SENSOR --> POLICY
 
-    POLICY[Policy Network<br/>11 → 32 → 8]
+    POLICY[Policy Network<br/>11 → 32 → 4]
 
     POLICY --> ACTION
 
@@ -288,7 +292,7 @@ Input Layer      11
       ↓
 Hidden Layer     32 (ReLU)
       ↓
-Output Layer      8 (Linear Q-values)
+Output Layer      4 (Linear Q-values)
 ```
 
 Inputs:
@@ -305,13 +309,9 @@ Outputs:
 1 = Move Down
 2 = Move Left
 3 = Move Right
-4 = Move North-East (Up + Right, normalized)
-5 = Move South-East (Down + Right, normalized)
-6 = Move North-West (Up + Left, normalized)
-7 = Move South-West (Down + Left, normalized)
 ```
 
-Action selection uses epsilon-greedy exploration (epsilon = 0.5, min = 0.08, decay = 0.9995). Diagonals are normalized so diagonal speed equals cardinal speed. Each training tick samples 8 experiences from replay.
+Action selection uses epsilon-greedy exploration.
 
 ---
 
@@ -453,7 +453,7 @@ Download Unity Hub: https://unity.com/download
 ## Clone Repository
 
 ```bash
-git clone [https://github.com/bryanspms/LifeForm.git](https://github.com/bryanspms/LifeForm.git)
+git clone https://github.com/bryanspms/LifeForm.git
 cd LifeForm
 ```
 
